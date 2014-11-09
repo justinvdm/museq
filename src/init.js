@@ -1,4 +1,5 @@
 ;(function() {
-  museq.cps = sig()
-  museq.master = museq.pulse(museq.cps)
+  museq.store = {}
+  museq.cps = sig(0.5)
+  museq.origin = sig(new Date())
 })()
