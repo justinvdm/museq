@@ -76,6 +76,12 @@ museq.testUtils = function() {
   }
 
 
+  function checkSeq(seq) {
+    return checkTimes(seq)
+      .stop(museq.stop)
+  }
+
+
   function noop() {
   }
 
@@ -84,6 +90,7 @@ museq.testUtils = function() {
     capture: capture,
     fromNow: fromNow,
     checkTimes: checkTimes,
-    checkPulse: checkPulse
+    checkPulse: checkPulse,
+    checkSeq: checkSeq
   }
 }()
