@@ -1,56 +1,10 @@
 describe("museq.pulse", function() {
-  function capture(s) {
-    var values = []
-
-    sig.map(s, function(x) {
-      values.push(x)
-    })
-
-    return values
-  }
-
-
-  function fromNow(offset) {
-    return +(new Date()) + offset
-  }
-
-
-  function checkPulse() {
-    var checks = []
-
-    var self = {
-      at: at,
-      check: check
-    }
-
-    function at(t, fn) {
-      checks.push([t, fn])
-      return self
-    }
-
-    function check(pulse, done) {
-      var ids = []
-      var values = capture(pulse)
-
-      at(checks[checks.length - 1][0] + 1, function() {
-        ids.forEach(clearTimeout)
-        museq.pulse.stop(pulse)
-        done()
-      })
-
-      checks.forEach(sig.spread(function(t, fn) {
-        ids.push(setTimeout(fn, t, values))
-      }))
-
-      return self
-    }
-
-    return self
-  }
-
+  var testUtils = museq.testUtils,
+      checkPulse = testUtils.checkPulse,
+      fromNow = testUtils.fromNow
 
   it("should push a new counter value each beat", function(done) {
-    checkPulse()
+    checkPulse(museq.pulse(3, 0.3, fromNow(-5)))
       .at(0, function(values) {
         values.should.be.empty
       })
@@ -72,11 +26,11 @@ describe("museq.pulse", function() {
       .at(610, function(values) {
         values.should.deep.equal([0, 1, 2, 0, 1, 2])
       })
-      .check(museq.pulse(3, 0.3, fromNow(-5)), done)
+      .done(done)
   })
 
   it("should align pulses to a given origin timestamp", function(done) {
-    checkPulse()
+    checkPulse(museq.pulse(3, 0.3, fromNow(-123)))
       .at(0, function(values) {
         values.should.be.empty
       })
@@ -95,13 +49,13 @@ describe("museq.pulse", function() {
       .at(410 + 123, function(values) {
         values.should.deep.equal([1, 2, 0, 1, 2])
       })
-      .check(museq.pulse(3, 0.3, fromNow(-123)), done)
+      .done(done)
   })
 
   it("should allow the beat count to be a signal", function(done) {
     var beatCount = sig(4)
 
-    checkPulse()
+    checkPulse(museq.pulse(beatCount, 0.4, fromNow(-5)))
       .at(0, function(values) {
         values.should.be.empty
       })
@@ -127,13 +81,13 @@ describe("museq.pulse", function() {
       .at(1010, function(values) {
         values.should.deep.equal([0, 1, 2, 3, 0, 1, 0])
       })
-      .check(museq.pulse(beatCount, 0.4, fromNow(-5)), done)
+      .done(done)
   })
 
   it("should allow the cycles per second to be a signal", function(done) {
     var cps = sig(0.6)
 
-    checkPulse()
+    checkPulse(museq.pulse(3, cps, fromNow(-5)))
       .at(0, function(values) {
         values.should.be.empty
       })
@@ -156,14 +110,14 @@ describe("museq.pulse", function() {
       .at(910, function(values) {
         values.should.deep.equal([0, 1, 2, 0, 1, 2])
       })
-      .check(museq.pulse(3, cps, fromNow(-5)), done)
+      .done(done)
   })
 
   it("should allow the origin to be a signal", function(done) {
     var origin = sig(fromNow(-123))
     var nextValue = fromNow(-182)
 
-    checkPulse()
+    checkPulse(museq.pulse(3, 0.3, origin))
       .at(0, function(values) {
         values.should.be.empty
       })
@@ -180,6 +134,6 @@ describe("museq.pulse", function() {
       .at(310 + 182, function(values) {
         values.should.deep.equal([1, 2, 1, 2])
       })
-      .check(museq.pulse(3, 0.3, origin), done)
+      .done(done)
   })
 })

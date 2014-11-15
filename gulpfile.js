@@ -6,7 +6,8 @@ var concat = require('gulp-concat')
 
 var src = [
   'src/index.js',
-  'src/pulse.js'
+  'src/pulse.js',
+  'src/normalize.js'
 ]
 
 
@@ -33,9 +34,15 @@ gulp.task('build', function() {
 
 gulp.task('test', function() {
   return gulp
-    .src(['bower_components/sig-js/sig.js']
+    .src([
+      'bower_components/sig-js/sig.js',
+      'bower_components/motif/motif.js'
+    ]
     .concat(src)
-    .concat(['tests/**/*.test.js']))
+    .concat([
+      'tests/testUtils.js',
+      'tests/**/*.test.js'
+    ]))
     .pipe(karma({
       action: 'watch',
       frameworks: ['mocha', 'chai'],
