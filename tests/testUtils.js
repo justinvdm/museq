@@ -17,7 +17,9 @@ museq.testUtils = function() {
 
   function checkTimes(signal) {
     var stop = noop
+    var done = noop
     var checks = []
+    var ended = false
 
     var self = {}
 
@@ -26,8 +28,9 @@ museq.testUtils = function() {
       return self
     }
 
-    self.done = function(done) {
-      check(done)
+    self.done = function(doneFn) {
+      done = doneFn
+      run()
       return self
     }
 
@@ -36,19 +39,31 @@ museq.testUtils = function() {
       return self
     }
 
-    function check(done) {
+    function run() {
       var ids = []
       var values = capture(signal)
 
       self.at(checks[checks.length - 1][0] + 1, function() {
         ids.forEach(clearTimeout)
-        stop(signal)
-        done()
+        end()
       })
 
       checks.forEach(sig.spread(function(t, fn) {
-        ids.push(setTimeout(fn, t, values))
+        ids.push(setTimeout(check, t, fn, values))
       }))
+    }
+
+    function check(fn, values) {
+      if (ended) return
+      try { fn(values) }
+      catch(e) { end(e) }
+    }
+
+    function end(e) {
+      ended = true
+      stop(signal)
+      if (e) done(null, e)
+      else done()
     }
 
     return self
