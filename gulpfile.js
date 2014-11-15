@@ -7,7 +7,8 @@ var concat = require('gulp-concat')
 var src = [
   'src/index.js',
   'src/pulse.js',
-  'src/normalize.js'
+  'src/normalize.js',
+  'src/init.js'
 ]
 
 
