@@ -70,7 +70,7 @@ describe("museq.pulse", function() {
       })
       .at(410, function(values) {
         values.should.deep.equal([0, 1, 2, 3])
-        sig.push(beatCount, 2)
+        sig.put(beatCount, 2)
       })
       .at(610, function(values) {
         values.should.deep.equal([0, 1, 2, 3, 0])
@@ -99,7 +99,7 @@ describe("museq.pulse", function() {
       })
       .at(610, function(values) {
         values.should.deep.equal([0, 1, 2])
-        sig.push(cps, 0.3)
+        sig.put(cps, 0.3)
       })
       .at(710, function(values) {
         values.should.deep.equal([0, 1, 2, 0])
@@ -126,7 +126,7 @@ describe("museq.pulse", function() {
       })
       .at(110 + 123, function(values) {
         values.should.deep.equal([1, 2])
-        sig.push(origin, nextValue)
+        sig.put(origin, nextValue)
       })
       .at(210 + 182, function(values) {
         values.should.deep.equal([1, 2, 1])

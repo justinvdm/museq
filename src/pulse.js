@@ -43,7 +43,7 @@ museq.pulse = function() {
     }, delay)
 
     function update() {
-      sig.push(s, i++ % n)
+      sig.put(s, i++ % n)
     }
 
     return d

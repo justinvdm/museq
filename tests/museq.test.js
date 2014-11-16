@@ -136,7 +136,7 @@ describe("museq", function() {
           0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5
         ])
 
-        sig.push(beats, [[6, 7], [8], [9]])
+        sig.put(beats, [[6, 7], [8], [9]])
       })
       .at(710, function(values) {
         values.should.deep.equal([

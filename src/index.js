@@ -40,11 +40,11 @@ var museq = function() {
 
   function pushBucket(out, bucket) {
     if (bucket === null) return
-    if (!isArray(bucket)) return sig.push(out, bucket)
+    if (!isArray(bucket)) return sig.put(out, bucket)
 
     var n = bucket.length
     var i = -1
-    while (++i < n) sig.push(out, bucket[i])
+    while (++i < n) sig.put(out, bucket[i])
   }
 
 
