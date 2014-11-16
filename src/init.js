@@ -1,5 +1,5 @@
 ;(function() {
   museq.store = {}
-  museq.cps = sig(0.5)
-  museq.origin = sig(new Date())
+  museq.cps = sig.sticky(0.5)
+  museq.origin = sig.sticky(new Date())
 })()

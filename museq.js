@@ -51,11 +51,11 @@ var museq = function() {
 
   function pushBucket(out, bucket) {
     if (bucket === null) return
-    if (!isArray(bucket)) return sig.push(out, bucket)
+    if (!isArray(bucket)) return sig.put(out, bucket)
 
     var n = bucket.length
     var i = -1
-    while (++i < n) sig.push(out, bucket[i])
+    while (++i < n) sig.put(out, bucket[i])
   }
 
 
@@ -120,7 +120,7 @@ museq.pulse = function() {
     }, delay)
 
     function update() {
-      sig.push(s, i++ % n)
+      sig.put(s, i++ % n)
     }
 
     return d
@@ -144,8 +144,8 @@ museq.pulse = function() {
 
 ;(function() {
   museq.store = {}
-  museq.cps = sig(0.5)
-  museq.origin = sig(new Date())
+  museq.cps = sig.sticky(0.5)
+  museq.origin = sig.sticky(new Date())
 })()
 
 return museq;
