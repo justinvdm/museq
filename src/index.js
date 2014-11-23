@@ -1,22 +1,33 @@
 var museq = function() {
-  museq.store = {}
-  museq.stop = stop
-
+  var map = sig.map,
+      watch = sig.watch,
+      cleanup = sig.cleanup,
+      depend = sig.depend,
+      reset = sig.reset,
+      resume = sig.resume,
+      put = sig.put,
+      ensure = sig.ensure
 
   var isArray = Array.isArray
 
 
   function museq(beats, opts) {
+    var pulse
     var out = sig()
     opts = parseOpts(opts)
 
-    var s = sig.map(sig.ensure(beats), function(beats) {
-      if (out.pulse) museq.pulse.stop(out.pulse)
-      out.pulse = museq.pulse(beats.length, opts.cps, opts.origin)
-      sequence(out, beats, out.pulse)
+    var s = map(ensure(beats), function(beats) {
+      resetPulse()
+      pulse = museq.pulse(beats.length, opts.cps, opts.origin)
+      watch(out, sequence(beats, pulse))
     })
 
-    sig.depend(s, out)
+    function resetPulse() {
+      if (pulse) reset(pulse)
+    }
+
+    depend(s, out)
+    cleanup(out, resetPulse)
     return out
   }
 
@@ -29,37 +40,28 @@ var museq = function() {
   }
 
 
-  function sequence(out, beats, pulse) {
-    var s = sig.map(pulse, function(i) {
-      pushBucket(out, beats[i])
+  function sequence(beats, pulse) {
+    var s = resume(sig())
+
+    var t = map(pulse, function(i) {
+      pushBucket(s, beats[i])
     })
 
-    sig.depend(s, out)
+    depend(t, s)
+    return s
   }
 
 
   function pushBucket(out, bucket) {
     if (bucket === null) return
-    if (!isArray(bucket)) return sig.put(out, bucket)
+    if (!isArray(bucket)) return put(out, bucket)
 
     var n = bucket.length
     var i = -1
-    while (++i < n) sig.put(out, bucket[i])
+    while (++i < n) put(out, bucket[i])
   }
 
 
-  function ensureArray(v) {
-    return !isArray(v)
-      ? [v]
-      : v
-  }
-
-
-  function stop(seq) {
-    museq.pulse.stop(seq.pulse)
-    sig.reset(seq)
-  }
-
-
+  museq.store = {}
   return museq
 }()

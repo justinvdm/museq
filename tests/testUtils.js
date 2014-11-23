@@ -72,13 +72,13 @@ museq.testUtils = function() {
 
   function checkPulse(pulse) {
     return checkTimes(pulse)
-      .stop(museq.pulse.stop)
+      .stop(sig.reset)
   }
 
 
   function checkSeq(seq) {
     return checkTimes(seq)
-      .stop(museq.stop)
+      .stop(sig.reset)
   }
 
 

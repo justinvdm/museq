@@ -1,5 +1,13 @@
 museq.pulse = function() {
-  pulse.stop = stop
+  var map = sig.map,
+      spread = sig.spread,
+      watch = sig.watch,
+      cleanup = sig.cleanup,
+      depend = sig.depend,
+      resume = sig.resume,
+      reset = sig.reset,
+      put = sig.put,
+      all = sig.all
 
 
   function pulse(beatCount, cps, origin) {
@@ -8,20 +16,26 @@ museq.pulse = function() {
     cps = cps || museq.cps
     origin = origin || museq.origin
 
-    var s = sig.all([beatCount, cps, origin])
+    var s = all([beatCount, cps, origin])
 
-    sig.map(s, sig.spread(function(beatCount, cps, origin) {
-      if (ticker) clearTicker(ticker)
-      ticker = pulseTick(out, beatCount, cps, origin)
+    map(s, spread(function(beatCount, cps, origin) {
+      resetTicker()
+      ticker = pulseTick(beatCount, cps, origin)
+      watch(out, ticker)
     }))
 
-    sig.depend(s, out)
-    out.ticker = ticker
+    depend(s, out)
+    cleanup(out, resetTicker)
+
+    function resetTicker() {
+      if (ticker) reset(ticker)
+    }
+
     return out
   }
 
 
-  function pulseTick(s, beatCount, cps, origin) {
+  function pulseTick(beatCount, cps, origin) {
     origin = +origin
 
     var now = +(new Date())
@@ -29,36 +43,30 @@ museq.pulse = function() {
     var i = Math.ceil((now - origin) / interval)
     var then = origin + (i * interval)
 
-    return tick(s, i, beatCount, interval, (then - now))
+    return tick(i, beatCount, interval, (then - now))
   }
 
 
-  function tick(s, i, n, interval, delay) {
-    var d = {}
-    i = i - 1
+  function tick(i, n, interval, delay) {
+    var s = resume(sig())
+    var intervalId
+    i--
 
-    d.delayId = setTimeout(function() {
+    var delayId = setTimeout(function() {
       update()
-      d.intervalId = setInterval(update, interval)
+      intervalId = setInterval(update, interval)
     }, delay)
 
+    cleanup(s, function() {
+      clearTimeout(delayId)
+      clearInterval(intervalId)
+    })
+
     function update() {
-      sig.put(s, i++ % n)
+      put(s, i++ % n)
     }
 
-    return d
-  }
-
-
-  function clearTicker(ticker) {
-    clearTimeout(ticker.delayId)
-    if ('intervalId' in ticker) clearInterval(ticker.intervalId)
-  }
-
-
-  function stop(pulse) {
-    clearTicker(pulse.ticker)
-    sig.reset(pulse)
+    return s
   }
 
 

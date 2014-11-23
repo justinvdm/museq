@@ -1,7 +1,10 @@
 describe("museq.pulse", function() {
+  var put = sig.put
+
   var testUtils = museq.testUtils,
       checkPulse = testUtils.checkPulse,
       fromNow = testUtils.fromNow
+
 
   it("should push a new counter value each beat", function(done) {
     checkPulse(museq.pulse(3, 0.3, fromNow(-5)))
@@ -70,7 +73,7 @@ describe("museq.pulse", function() {
       })
       .at(410, function(values) {
         values.should.deep.equal([0, 1, 2, 3])
-        sig.put(beatCount, 2)
+        put(beatCount, 2)
       })
       .at(610, function(values) {
         values.should.deep.equal([0, 1, 2, 3, 0])
@@ -99,7 +102,7 @@ describe("museq.pulse", function() {
       })
       .at(610, function(values) {
         values.should.deep.equal([0, 1, 2])
-        sig.put(cps, 0.3)
+        put(cps, 0.3)
       })
       .at(710, function(values) {
         values.should.deep.equal([0, 1, 2, 0])
@@ -126,7 +129,7 @@ describe("museq.pulse", function() {
       })
       .at(110 + 123, function(values) {
         values.should.deep.equal([1, 2])
-        sig.put(origin, nextValue)
+        put(origin, nextValue)
       })
       .at(210 + 182, function(values) {
         values.should.deep.equal([1, 2, 1])

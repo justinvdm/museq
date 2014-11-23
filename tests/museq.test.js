@@ -1,7 +1,10 @@
 describe("museq", function() {
+  var put = sig.put
+
   var testUtils = museq.testUtils,
       checkSeq = testUtils.checkSeq,
       fromNow = testUtils.fromNow
+
 
   it("should push each bucket of beat values", function(done) {
     checkSeq(museq([[0, 1], [2], [3, 4, 5]], {
@@ -136,7 +139,7 @@ describe("museq", function() {
           0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5
         ])
 
-        sig.put(beats, [[6, 7], [8], [9]])
+        put(beats, [[6, 7], [8], [9]])
       })
       .at(710, function(values) {
         values.should.deep.equal([
