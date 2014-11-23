@@ -62,7 +62,7 @@ museq.testUtils = function() {
     function end(e) {
       ended = true
       stop(signal)
-      if (e) done(null, e)
+      if (e) done(e)
       else done()
     }
 

@@ -97,7 +97,7 @@ describe("museq", function() {
   })
 
   it("should allow the beats to be a signal", function(done) {
-    var beats = sig([[[0, 1], [2], [4, 5]]])
+    var beats = sig([[[0, 1], [2], [3, 4, 5]]])
 
     checkSeq(museq(beats, {
         cps: 0.3,
@@ -155,22 +155,22 @@ describe("museq", function() {
           0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5,
           6, 7, 8, 9])
       })
-      .at(1110, function(values) {
+      .at(1010, function(values) {
         values.should.deep.equal([
           0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5,
           6, 7, 8, 9, 6, 7
         ])
       })
+      .at(1110, function(values) {
+        values.should.deep.equal([
+          0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5,
+          6, 7, 8, 9, 6, 7, 8
+        ])
+      })
       .at(1210, function(values) {
         values.should.deep.equal([
           0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5,
-          6, 7, 8, 8, 9, 6, 7, 8
-        ])
-      })
-      .at(610, function(values) {
-        values.should.deep.equal([
-          0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5,
-          6, 7, 8, 8, 9, 6, 7, 8, 9
+          6, 7, 8, 9, 6, 7, 8, 9
         ])
       })
       .done(done)
