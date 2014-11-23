@@ -15,6 +15,7 @@ var museq = function() {
       cleanup = sig.cleanup,
       depend = sig.depend,
       reset = sig.reset,
+      resume = sig.resume,
       put = sig.put,
       ensure = sig.ensure
 
@@ -51,7 +52,7 @@ var museq = function() {
 
 
   function sequence(beats, pulse) {
-    var s = sig()
+    var s = resume(sig())
 
     var t = map(pulse, function(i) {
       pushBucket(s, beats[i])
@@ -68,7 +69,7 @@ var museq = function() {
 
     var n = bucket.length
     var i = -1
-    while (++i < n) sig.put(out, bucket[i])
+    while (++i < n) put(out, bucket[i])
   }
 
 
@@ -82,6 +83,7 @@ museq.pulse = function() {
       watch = sig.watch,
       cleanup = sig.cleanup,
       depend = sig.depend,
+      resume = sig.resume,
       reset = sig.reset,
       put = sig.put,
       all = sig.all
@@ -125,7 +127,7 @@ museq.pulse = function() {
 
 
   function tick(i, n, interval, delay) {
-    var s = sig()
+    var s = resume(sig())
     var intervalId
     i--
 

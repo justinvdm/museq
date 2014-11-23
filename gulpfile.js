@@ -37,7 +37,7 @@ gulp.task('test', function() {
   return gulp
     .src([
       'bower_components/sig-js/sig.js',
-      'bower_components/motif/motif.js'
+      'bower_components/drainpipe/drainpipe.js'
     ]
     .concat(src)
     .concat([

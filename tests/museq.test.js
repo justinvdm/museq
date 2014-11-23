@@ -2,180 +2,187 @@ describe("museq", function() {
   var put = sig.put
 
   var testUtils = museq.testUtils,
-      checkSeq = testUtils.checkSeq,
-      fromNow = testUtils.fromNow
+      fromNow = testUtils.fromNow,
+      timeCheck = testUtils.timeCheck
+
+  var at = timeCheck.at,
+      end = timeCheck.end
 
 
   it("should push each bucket of beat values", function(done) {
-    checkSeq(museq([[0, 1], [2], [3, 4, 5]], {
+    vv(museq([[0, 1], [2], [3, 4, 5]], {
         cps: 0.3,
         origin: fromNow(-5)
       }))
-      .at(0, function(values) {
+      (timeCheck)
+      (at, 0, function(values) {
         values.should.be.empty
       })
-      .at(110, function(values) {
+      (at, 110, function(values) {
         values.should.deep.equal([0, 1])
       })
-      .at(210, function(values) {
+      (at, 210, function(values) {
         values.should.deep.equal([0, 1, 2])
       })
-      .at(310, function(values) {
+      (at, 310, function(values) {
         values.should.deep.equal([0, 1, 2, 3, 4, 5])
       })
-      .at(410, function(values) {
+      (at, 410, function(values) {
         values.should.deep.equal([0, 1, 2, 3, 4, 5, 0, 1])
       })
-      .at(510, function(values) {
+      (at, 510, function(values) {
         values.should.deep.equal([0, 1, 2, 3, 4, 5, 0, 1, 2])
       })
-      .at(610, function(values) {
+      (at, 610, function(values) {
         values.should.deep.equal([0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5])
       })
-      .done(done)
+      (end, done)
   })
 
   it("should support single beats", function(done) {
-    checkSeq(museq([0, 1, 2], {
+    vv(museq([0, 1, 2], {
         cps: 0.3,
         origin: fromNow(-5)
       }))
-      .at(0, function(values) {
+      (timeCheck)
+      (at, 0, function(values) {
         values.should.be.empty
       })
-      .at(110, function(values) {
+      (at, 110, function(values) {
         values.should.deep.equal([0])
       })
-      .at(210, function(values) {
+      (at, 210, function(values) {
         values.should.deep.equal([0, 1])
       })
-      .at(310, function(values) {
+      (at, 310, function(values) {
         values.should.deep.equal([0, 1, 2])
       })
-      .at(410, function(values) {
+      (at, 410, function(values) {
         values.should.deep.equal([0, 1, 2, 0])
       })
-      .at(510, function(values) {
+      (at, 510, function(values) {
         values.should.deep.equal([0, 1, 2, 0, 1])
       })
-      .at(610, function(values) {
+      (at, 610, function(values) {
         values.should.deep.equal([0, 1, 2, 0, 1, 2])
       })
-      .done(done)
+      (end, done)
   })
 
   it("should support no beats", function(done) {
-    checkSeq(museq([[0, 1], null, null, [2, 3]], {
+    vv(museq([[0, 1], null, null, [2, 3]], {
         cps: 0.4,
         origin: fromNow(-5)
       }))
-      .at(0, function(values) {
+      (timeCheck)
+      (at, 0, function(values) {
         values.should.be.empty
       })
-      .at(110, function(values) {
+      (at, 110, function(values) {
         values.should.deep.equal([0, 1])
       })
-      .at(210, function(values) {
+      (at, 210, function(values) {
         values.should.deep.equal([0, 1])
       })
-      .at(310, function(values) {
+      (at, 310, function(values) {
         values.should.deep.equal([0, 1])
       })
-      .at(410, function(values) {
+      (at, 410, function(values) {
         values.should.deep.equal([0, 1, 2, 3])
       })
-      .at(510, function(values) {
+      (at, 510, function(values) {
         values.should.deep.equal([0, 1, 2, 3, 0, 1])
       })
-      .at(610, function(values) {
+      (at, 610, function(values) {
         values.should.deep.equal([0, 1, 2, 3, 0, 1])
       })
-      .at(710, function(values) {
+      (at, 710, function(values) {
         values.should.deep.equal([0, 1, 2, 3, 0, 1])
       })
-      .at(810, function(values) {
+      (at, 810, function(values) {
         values.should.deep.equal([0, 1, 2, 3, 0, 1, 2, 3])
       })
-      .done(done)
+      (end, done)
   })
 
   it("should allow the beats to be a signal", function(done) {
     var beats = sig([[[0, 1], [2], [3, 4, 5]]])
 
-    checkSeq(museq(beats, {
+    vv(museq(beats, {
         cps: 0.3,
         origin: fromNow(-5)
       }))
-      .at(0, function(values) {
+      (timeCheck)
+      (at, 0, function(values) {
         values.should.be.empty
       })
-      .at(110, function(values) {
+      (at, 110, function(values) {
         values.should.deep.equal([
           0, 1
         ])
       })
-      .at(210, function(values) {
+      (at, 210, function(values) {
         values.should.deep.equal([
           0, 1, 2
         ])
       })
-      .at(310, function(values) {
+      (at, 310, function(values) {
         values.should.deep.equal([
           0, 1, 2, 3, 4, 5
         ])
       })
-      .at(410, function(values) {
+      (at, 410, function(values) {
         values.should.deep.equal([
           0, 1, 2, 3, 4, 5, 0, 1
         ])
       })
-      .at(510, function(values) {
+      (at, 510, function(values) {
         values.should.deep.equal([
           0, 1, 2, 3, 4, 5, 0, 1, 2
         ])
       })
-      .at(610, function(values) {
+      (at, 610, function(values) {
         values.should.deep.equal([
           0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5
         ])
 
         put(beats, [[6, 7], [8], [9]])
       })
-      .at(710, function(values) {
+      (at, 710, function(values) {
         values.should.deep.equal([
           0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5,
           6, 7
         ])
       })
-      .at(810, function(values) {
+      (at, 810, function(values) {
         values.should.deep.equal([
           0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5,
           6, 7, 8
         ])
       })
-      .at(910, function(values) {
+      (at, 910, function(values) {
         values.should.deep.equal([
           0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5,
           6, 7, 8, 9])
       })
-      .at(1010, function(values) {
+      (at, 1010, function(values) {
         values.should.deep.equal([
           0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5,
           6, 7, 8, 9, 6, 7
         ])
       })
-      .at(1110, function(values) {
+      (at, 1110, function(values) {
         values.should.deep.equal([
           0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5,
           6, 7, 8, 9, 6, 7, 8
         ])
       })
-      .at(1210, function(values) {
+      (at, 1210, function(values) {
         values.should.deep.equal([
           0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5,
           6, 7, 8, 9, 6, 7, 8, 9
         ])
       })
-      .done(done)
+      (end, done)
   })
 })
