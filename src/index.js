@@ -98,7 +98,7 @@ var mu = function() {
   }
 
 
-  function seq() {
+  function seq(v) {
   }
 
 
@@ -129,4 +129,5 @@ var mu = function() {
     seq: seq,
     loop: loop
   }
-}()
+}();
+mu;
