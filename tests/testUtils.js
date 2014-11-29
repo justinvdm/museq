@@ -1,4 +1,4 @@
-museq.testUtils = function() {
+mu.testUtils = function() {
   var all = sig.all,
       then = sig.then,
       reset = sig.reset,
@@ -15,11 +15,6 @@ museq.testUtils = function() {
     })
 
     return values
-  }
-
-
-  function fromNow(offset) {
-    return +(new Date()) + offset
   }
 
 
@@ -63,6 +58,11 @@ museq.testUtils = function() {
     }
 
     return d
+  }
+
+
+  function fromNow(offset) {
+    return +(new Date()) + offset
   }
 
 

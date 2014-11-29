@@ -1,10 +1,10 @@
 {
-  "name": "museq",
+  "name": "mu-js",
   "version": "0.0.0",
-  "description": "sequence functions to a metronome",
+  "description": "time-sequence things",
   "repository": {
     "type": "git",
-    "url": "git://github.com/justinvdm/museq.git"
+    "url": "git://github.com/justinvdm/mu.git"
   },
   "main": "museq.js",
   "scripts": {

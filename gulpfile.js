@@ -4,20 +4,12 @@ var umd = require('gulp-wrap-umd')
 var concat = require('gulp-concat')
 
 
-var src = [
-  'src/index.js',
-  'src/pulse.js',
-  'src/normalize.js',
-  'src/init.js'
-]
-
-
 gulp.task('build', function() {
-  return gulp.src(src)
-    .pipe(concat('museq.js'))
+  return gulp.src('src/index.js')
+    .pipe(concat('mu.js'))
     .pipe(umd({
-      exports: 'museq',
-      namespace: 'museq',
+      exports: 'mu',
+      namespace: 'mu',
       deps: [{
         name: 'sig',
         amdName: 'sig-js',
@@ -37,13 +29,11 @@ gulp.task('test', function() {
   return gulp
     .src([
       'bower_components/sig-js/sig.js',
-      'bower_components/drainpipe/drainpipe.js'
-    ]
-    .concat(src)
-    .concat([
+      'bower_components/drainpipe/drainpipe.js',
+      'src/index.js',
       'tests/testUtils.js',
       'tests/**/*.test.js'
-    ]))
+    ])
     .pipe(karma({
       action: 'watch',
       frameworks: ['mocha', 'chai'],
