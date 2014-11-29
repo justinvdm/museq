@@ -4,7 +4,8 @@ mu.testUtils = function() {
       reset = sig.reset,
       except = sig.except,
       cleanup = sig.cleanup,
-      resolve = sig.resolve
+      put = sig.put,
+      map = sig.map
 
 
   function capture(s) {
@@ -28,15 +29,18 @@ mu.testUtils = function() {
 
 
   timeCheck.at = function(d, ms, fn) {
-    var s = sig()
+    var s = sig(function() {
+      var s = sig()
 
-    var id = setTimeout(function() {
-      fn(d.state)
-      resolve(s)
-    }, ms)
+      var id = setTimeout(function() {
+        put(s, d.state)
+      }, ms)
 
-    cleanup(s, function() {
-      clearTimeout(id)
+      cleanup(s, function() {
+        clearTimeout(id)
+      })
+
+      return map(s, fn)
     })
 
     d.runs.push(s)
