@@ -6,10 +6,10 @@ var concat = require('gulp-concat')
 
 gulp.task('build', function() {
   return gulp.src('src/index.js')
-    .pipe(concat('mu.js'))
+    .pipe(concat('museq.js'))
     .pipe(umd({
-      exports: 'mu',
-      namespace: 'mu',
+      exports: 'museq',
+      namespace: 'museq',
       deps: [{
         name: 'sig',
         amdName: 'sig-js',

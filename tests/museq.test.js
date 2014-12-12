@@ -1,15 +1,15 @@
-describe("mu", function() {
+describe("museq", function() {
   var val = sig.val,
       put = sig.put
 
-  var testUtils = mu.testUtils,
+  var testUtils = museq.testUtils,
       fromNow = testUtils.fromNow,
       timeCheck = testUtils.timeCheck
 
   var at = timeCheck.at,
       end = timeCheck.end
 
-  var loop = mu.loop
+  var loop = museq.loop
 
   describe(".loop", function() {
     it("should loop the given value", function(done) {

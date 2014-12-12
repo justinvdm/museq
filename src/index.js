@@ -1,4 +1,4 @@
-var mu = function() {
+var museq = function() {
   var all = sig.all,
       reset = sig.reset,
       cleanup = sig.cleanup,
@@ -144,4 +144,4 @@ var mu = function() {
     loop: loop
   }
 }();
-mu;
+museq;

@@ -5,11 +5,11 @@
   } else if (typeof exports === 'object') {
     module.exports = factory(require('sig-js'));
   } else {
-    root.mu = factory(root.sig);
+    root.museq = factory(root.sig);
   }
 }(this, function(sig) {
 
-var mu = function() {
+var museq = function() {
   var all = sig.all,
       reset = sig.reset,
       cleanup = sig.cleanup,
@@ -48,7 +48,6 @@ var mu = function() {
   function loopTick(interval, origin) {
     interval = interval * 1000
 
-    console.log(nextLoop(interval, origin))
     return vv(nextLoop(interval, origin))
       (sleep)
       (update, function() { return tick(interval) })
@@ -79,7 +78,7 @@ var mu = function() {
 
 
   function sleep(interval) {
-    var s = resume(sig())
+    var s = sig()
     var delayId = setTimeout(resolve, interval, s)
 
     cleanup(s, function() {
@@ -91,7 +90,7 @@ var mu = function() {
 
 
   function tick(interval) {
-    var s = resume(sig())
+    var s = sig()
     var intervalId = setInterval(resolve, interval, s)
 
     cleanup(s, function() {
@@ -105,7 +104,7 @@ var mu = function() {
 
   function update(s, fn) {
     var curr
-    var t = resume(sig())
+    var t = sig()
 
     vv(s)
       (then, function(x) {
@@ -113,6 +112,7 @@ var mu = function() {
         curr = fn(x)
         then(curr, t)
       })
+      (then, t)
 
     return t
   }
@@ -155,8 +155,8 @@ var mu = function() {
     loop: loop
   }
 }();
-mu;
+museq;
 
-return mu;
+return museq;
 
 }));

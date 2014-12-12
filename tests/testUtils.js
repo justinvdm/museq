@@ -1,4 +1,4 @@
-mu.testUtils = function() {
+museq.testUtils = function() {
   var all = sig.all,
       then = sig.then,
       reset = sig.reset,

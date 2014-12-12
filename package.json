@@ -1,10 +1,10 @@
 {
-  "name": "mu-js",
+  "name": "museq",
   "version": "0.0.0",
   "description": "time-sequence things",
   "repository": {
     "type": "git",
-    "url": "git://github.com/justinvdm/mu.git"
+    "url": "git://github.com/justinvdm/museq.git"
   },
   "main": "museq.js",
   "scripts": {
