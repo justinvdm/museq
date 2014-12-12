@@ -17,7 +17,6 @@ var museq = function() {
       spread = sig.spread,
       put = sig.put,
       then = sig.then,
-      pause = sig.pause,
       resume = sig.resume
 
   var globalOrigin = +(new Date())
@@ -27,7 +26,7 @@ var museq = function() {
     parseLoopOpts(arguments)
 
     var curr
-    var s = resume(sig())
+    var s = sig()
 
     vv(ensure(x))
       (then, function(x) { curr = x })
