@@ -29,21 +29,17 @@ mu.testUtils = function() {
 
 
   timeCheck.at = function(d, ms, fn) {
-    var s = sig(function() {
-      var s = sig()
+    var s = sig()
 
-      var id = setTimeout(function() {
-        put(s, d.state)
-      }, ms)
+    var id = setTimeout(function() {
+      put(s, d.state)
+    }, ms)
 
-      cleanup(s, function() {
-        clearTimeout(id)
-      })
-
-      return map(s, fn)
+    cleanup(s, function() {
+      clearTimeout(id)
     })
 
-    d.runs.push(s)
+    d.runs.push(map(s, fn))
     return d
   }
 

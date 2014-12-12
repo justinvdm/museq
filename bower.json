@@ -12,6 +12,6 @@
   "private": false,
   "dependencies": {
     "sig-js": "~0.1.0",
-    "sig.all": "~0.1.0"
+    "drainpipe": "~0.1.0"
   }
 }

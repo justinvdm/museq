@@ -2,58 +2,45 @@ var mu = function() {
   var all = sig.all,
       reset = sig.reset,
       cleanup = sig.cleanup,
-      resolve = sig.resolve,
-      resume = sig.resume,
       ensure = sig.ensure,
-      watch = sig.watch,
-      map = sig.map,
-      put = sig.put
+      spread = sig.spread,
+      put = sig.put,
+      then = sig.then,
+      pause = sig.pause,
+      resume = sig.resume
 
   var globalOrigin = +(new Date())
 
 
-  function loop(v, interval, origin) {
+  function loop(x, interval, origin) {
     parseLoopOpts(arguments)
 
-    return sig(function() {
-      var s = resume(sig())
-      var started = false
-      var curr
+    var curr
+    var s = resume(sig())
 
-      map(ensure(v), function update(x) {
-        curr = x
-        started = true
+    vv(ensure(x))
+      (then, function(x) { curr = x })
+      (then, s)
+
+    vv([interval, origin])
+      (all)
+      (update, spread(loopTick))
+      (then, function() {
+        if (typeof curr != 'undefined') put(this, curr)
       })
+      (then, s)
 
-      map(loopTick(interval, origin), function() {
-        if (started) put(s, curr)
-      })
-
-      return s
-    })
+    return s
   }
 
 
-  function loopTick() {
-    var args = arguments
+  function loopTick(interval, origin) {
+    interval = interval * 1000
 
-    return sig(function() {
-      var s = resume(sig())
-      var t
-
-      all(args, function(interval, origin) {
-        clear()
-        t = tick(interval * 1000, nextLoop(interval, origin))
-        watch(s, t)
-      })
-
-      cleanup(s, clear)
-      return s
-
-      function clear() {
-        if (t) reset(t)
-      }
-    })
+    return vv(nextLoop(interval, origin))
+      (sleep)
+      (update, function() { return tick(interval) })
+      ()
   }
 
 
@@ -66,35 +53,62 @@ var mu = function() {
       interval = interval.interval
     }
 
-    interval = deflt(interval, 2),
+    interval = deflt(interval, 2)
     origin = +deflt(origin, globalOrigin)
   }
 
 
   function nextLoop(interval, origin) {
     var now = +(new Date())
-    var i = Math.ceil((now - origin) / (interval * 1000))
+    var i = Math.ceil((now - origin) / interval)
     var then = origin + (i * interval)
     return then - now
   }
 
 
-  function tick(interval, delay) {
-    return sig(function() {
-      var s = resume(sig())
-      var intervalId
+  function sleep(interval) {
+    var s = sig()
+    var delayId = setTimeout(resolve, interval, s)
 
-      var delayId = setTimeout(function() {
-        intervalId = setInterval(resolve, interval, s)
-      }, delay)
-
-      cleanup(s, function() {
-        clearTimeout(delayId)
-        clearInterval(intervalId)
-      })
-
-      return s
+    cleanup(s, function() {
+      clearInterval(delayId)
     })
+    
+    return s
+  }
+
+
+  function tick(interval) {
+    var s = sig()
+    var intervalId = setInterval(resolve, interval, s)
+
+    cleanup(s, function() {
+      clearInterval(intervalId)
+    })
+
+    resolve(s)
+    return s
+  }
+
+
+  function update(s, fn) {
+    var curr
+    var t = sig()
+
+    vv(s)
+      (then, function(x) {
+        if (typeof curr != 'undefined') reset(curr)
+        curr = fn(x)
+        then(curr, t)
+      })
+      (then, t)
+
+    return t
+  }
+
+
+  function resolve(s) {
+    put(s, null)
   }
 
 

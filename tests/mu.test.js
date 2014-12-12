@@ -124,7 +124,7 @@ describe("mu", function() {
     })
 
     it("should allow the origin to be a signal", function(done) {
-      var origin = sig(fromNow(-123))
+      var origin = val(fromNow(-123))
       var originB = fromNow(-182)
 
       vv(loop(23, 0.1, origin))
