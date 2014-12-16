@@ -6,9 +6,6 @@ var museq = function() {
       spread = sig.spread,
       put = sig.put,
       then = sig.then,
-      depend = sig.depend,
-      except = sig.except,
-      filter = sig.filter,
       map = sig.map,
       redir = sig.redir
 
@@ -105,7 +102,7 @@ var museq = function() {
     fn = prime(slice(arguments, 3), fn)
 
     return map(s, function(x) {
-      return !(++i % n)
+      return ++i % n === 0
         ? fn.call(this, x)
         : x
     })
@@ -121,7 +118,14 @@ var museq = function() {
   }
 
 
-  function run() {
+  function run(s) {
+    var args = slice(arguments, 1)
+
+    return tr(s, function(obj) {
+      return typeof obj == 'function'
+        ? obj.apply(this, args)
+        : obj
+    })
   }
 
 

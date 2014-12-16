@@ -132,7 +132,12 @@ var museq = function() {
   }
 
 
-  function run() {
+  function run(s) {
+    return tr(s, function(obj) {
+      return typeof obj == 'function'
+        ? return obj.apply(this, slice(arguments, 1))
+        : obj
+    })
   }
 
 

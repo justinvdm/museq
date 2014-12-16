@@ -14,7 +14,8 @@ describe("museq", function() {
       seq = museq.seq,
       seqOnce = museq.seqOnce,
       every = museq.every,
-      tr = museq.tr
+      tr = museq.tr,
+      run = museq.run
 
   describe(".loop", function() {
     it("should loop the given value", function(done) {
@@ -430,5 +431,75 @@ describe("museq", function() {
 
 
   describe(".run", function() {
+    it("should map each function in each array to its result", function() {
+      var s = sig()
+      var results = []
+
+      vv(s)
+        (run)
+        (then, function(values) { results.push(values) })
+
+      vv(s)
+        (put, [a, b, a])
+        (put, [a, a, b])
+
+      assert.deepEqual(results, [
+        [0, 1, 0],
+        [0, 0, 1]])
+
+      function a() {
+        return 0
+      }
+
+      function b() {
+        return 1
+      }
+    })
+
+    it("should simply pass through non-functions", function() {
+      var s = sig()
+      var results = []
+
+      vv(s)
+        (run)
+        (then, function(values) { results.push(values) })
+
+      vv(s)
+        (put, [a, 1, a])
+        (put, [a, a, 1])
+
+      assert.deepEqual(results, [
+        [0, 1, 0],
+        [0, 0, 1]])
+
+      function a() {
+        return 0
+      }
+    })
+
+    it("should allow extra args", function() {
+      var s = sig()
+      var results = []
+
+      vv(s)
+        (run, 2)
+        (then, function(values) { results.push(values) })
+
+      vv(s)
+        (put, [a, b, a])
+        (put, [a, a, b])
+
+      assert.deepEqual(results, [
+        [4, 6, 4],
+        [4, 4, 6]])
+
+      function a(n) {
+        return n * 2
+      }
+
+      function b(n) {
+        return n * 3
+      }
+    })
   })
 })
