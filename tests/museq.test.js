@@ -13,7 +13,8 @@ describe("museq", function() {
   var loop = museq.loop,
       seq = museq.seq,
       seqOnce = museq.seqOnce,
-      every = museq.every
+      every = museq.every,
+      tr = museq.tr
 
   describe(".loop", function() {
     it("should loop the given value", function(done) {
@@ -392,6 +393,39 @@ describe("museq", function() {
 
 
   describe(".tr", function() {
+    it("should map each element in each array given by the signal", function() {
+      var s = sig()
+      var results = []
+
+      vv(s)
+        (tr, function(x) { return -x })
+        (then, function(values) { results.push(values) })
+
+      vv(s)
+        (put, [1, 2, 3])
+        (put, [4, 5, 6])
+
+      assert.deepEqual(results, [
+        [-1, -2, -3],
+        [-4, -5, -6]])
+    })
+
+    it("should allow extra args", function() {
+      var s = sig()
+      var results = []
+
+      vv(s)
+        (tr, function(x, n) { return -x * n }, 2)
+        (then, function(values) { results.push(values) })
+
+      vv(s)
+        (put, [1, 2, 3])
+        (put, [4, 5, 6])
+
+      assert.deepEqual(results, [
+        [-2, -4, -6],
+        [-8, -10, -12]])
+    })
   })
 
 

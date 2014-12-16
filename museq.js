@@ -124,6 +124,11 @@ var museq = function() {
 
 
   function tr(s, fn) {
+    fn = prime(slice(arguments, 2), fn)
+
+    return map(s, function(arr) {
+      return arr.map(fn, this)
+    })
   }
 
 
