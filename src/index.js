@@ -9,7 +9,9 @@ var museq = function() {
       depend = sig.depend,
       except = sig.except,
       filter = sig.filter,
-      map = sig.map
+      map = sig.map,
+      redir = sig.redir
+
 
   var globalOrigin = +(new Date())
   var _slice = Array.prototype.slice
@@ -22,15 +24,15 @@ var museq = function() {
     vv(x)
       (ensure)
       (then, function(nextX) { x = nextX })
-      (depend, out)
+      (redir, out)
 
     vv([interval, origin])
       (all)
       (update, spread(loopTick))
       (then, function() {
-        if (typeof x != 'undefined') put(out, x)
+        if (typeof x != 'undefined') put(this, x)
       })
-      (depend, out)
+      (redir, out)
 
     return out
   }
@@ -90,9 +92,9 @@ var museq = function() {
         return tick(interval)
       }))
       (then, function() {
-        if (++i < values.length) put(out, values[i])
+        if (++i < values.length) put(this, values[i])
       })
-      (depend, out)
+      (redir, out)
 
     return out
   }
@@ -100,17 +102,17 @@ var museq = function() {
 
   function every(s, n, fn) {
     var i = -n
-    var args = slice(arguments, 3)
+    fn = prime(slice(arguments, 3), fn)
 
     return map(s, function(x) {
       return !(++i % n)
-        ? fn.apply(this, [x].concat(args))
+        ? fn.call(this, x)
         : x
     })
   }
 
 
-  function tr() {
+  function tr(s, fn) {
   }
 
 
@@ -145,56 +147,43 @@ var museq = function() {
 
   function append(s, fn) {
     var out = sig()
-    var args = slice(arguments, 2)
+    fn = prime(slice(arguments, 2), fn)
 
     vv(s)
-      (then, function(x) { applyOut(out, fn, x, args) })
-      (depend, out)
+      (then, function(x) { redir(fn(x), out) })
+      (redir, out)
 
     return out
   }
 
 
   function update(s, fn) {
-    var out = sig()
-    var args = slice(arguments, 2)
     var curr
+    var out = sig()
+    fn = prime(slice(arguments, 2), fn)
 
     vv(s)
       (then, function(x) {
         if (curr) reset(curr)
-        curr = applyOut(out, fn, x, args)
+        curr = redir(fn(x), out)
       })
-      (depend, out)
+      (redir, out)
 
     return out
   }
 
 
-  function applyOut(out, fn, x, args) {
-    var result = fn.apply(null, [x].concat(args))
-    if (!result) return
-
-    return vv(result)
-      (then, puts, out)
-      (except, raises, out)
-      (depend, out)
-      ()
-  }
-
-
-  function puts(x, s) {
-    put(s, x)
-  }
-
-
-  function raises(e, s) {
-    put(s, e)
-  }
-
-
   function resolve(s) {
     put(s, null)
+  }
+
+
+  function prime(args, fn) {
+    if (!args.length) return fn
+
+    return function(x) {
+      return fn.apply(this, [x].concat(args))
+    }
   }
 
 
