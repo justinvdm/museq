@@ -5,7 +5,9 @@ var museq = function() {
       ensure = sig.ensure,
       spread = sig.spread,
       put = sig.put,
-      then = sig.then
+      then = sig.then,
+      depend = sig.depend,
+      except = sig.except
 
   var globalOrigin = +(new Date())
 
@@ -13,20 +15,20 @@ var museq = function() {
   function loop(x, interval, origin) {
     parseLoopOpts(arguments)
 
-    var curr
     var s = sig()
+    var curr
 
     vv(ensure(x))
       (then, function(x) { curr = x })
-      (then, s)
+      (depend, s)
 
     vv([interval, origin])
       (all)
       (update, spread(loopTick))
       (then, function() {
-        if (typeof curr != 'undefined') put(this, curr)
+        if (typeof curr != 'undefined') put(s, curr)
       })
-      (then, s)
+      (depend, s)
 
     return s
   }
@@ -71,7 +73,7 @@ var museq = function() {
     cleanup(s, function() {
       clearInterval(delayId)
     })
-    
+
     return s
   }
 
@@ -90,18 +92,30 @@ var museq = function() {
 
 
   function update(s, fn) {
+    var out = sig()
     var curr
-    var t = sig()
 
     vv(s)
       (then, function(x) {
-        if (typeof curr != 'undefined') reset(curr)
+        if (curr) reset(curr)
         curr = fn(x)
-        then(curr, t)
-      })
-      (then, t)
 
-    return t
+        var t
+        t = then(curr, puts)
+        t = except(t, raises)
+        depend(t, out)
+      })
+      (depend, out)
+
+    function raises(e) {
+      put(out, e)
+    }
+
+    function puts(x) {
+      put(out, x)
+    }
+
+    return out
   }
 
 
@@ -139,7 +153,8 @@ var museq = function() {
     tr: tr,
     run: run,
     seq: seq,
-    loop: loop
+    loop: loop,
+    update: update
   }
 }();
 museq;
