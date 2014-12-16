@@ -283,6 +283,33 @@ describe("museq", function() {
         (end, done)
     })
 
+    it("should sequence the given results", function(done) {
+      vv(seqOnce([21, 22, 23], 0.3))
+        (timeCheck)
+        (at, 0, function(results) {
+          results.should.deep.equal([21])
+        })
+        (at, 110, function(results) {
+          results.should.deep.equal([21, 22])
+        })
+        (at, 210, function(results) {
+          results.should.deep.equal([21, 22, 23])
+        })
+        (at, 310, function(results) {
+          results.should.deep.equal([21, 22, 23])
+        })
+        (at, 410, function(results) {
+          results.should.deep.equal([21, 22, 23])
+        })
+        (at, 510, function(results) {
+          results.should.deep.equal([21, 22, 23])
+        })
+        (at, 610, function(results) {
+          results.should.deep.equal([21, 22, 23])
+        })
+        (end, done)
+    })
+
     it("should allow the values to be a signal", function(done) {
       var values = val([21, 22, 23])
 
@@ -394,7 +421,7 @@ describe("museq", function() {
 
 
   describe(".tr", function() {
-    it("should map each element in each array given by the signal", function() {
+    it("should map each element in arrays given by the signal", function() {
       var s = sig()
       var results = []
 
@@ -409,6 +436,21 @@ describe("museq", function() {
       assert.deepEqual(results, [
         [-1, -2, -3],
         [-4, -5, -6]])
+    })
+
+    it("should map single values", function() {
+      var s = sig()
+      var results = []
+
+      vv(s)
+        (tr, function(x) { return -x })
+        (then, function(values) { results.push(values) })
+
+      vv(s)
+        (put, 3)
+        (put, [4, 5, 6])
+
+      assert.deepEqual(results, [-3, [-4, -5, -6]])
     })
 
     it("should allow extra args", function() {

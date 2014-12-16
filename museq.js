@@ -22,6 +22,7 @@ var museq = function() {
 
 
   var globalOrigin = +(new Date())
+  var isArray = Array.isArray
   var _slice = Array.prototype.slice
 
 
@@ -82,7 +83,7 @@ var museq = function() {
     vv([values, interval])
       (all)
       (update, spread(function(nextValues, interval) {
-        values = nextValues
+        values = ensureArray(nextValues)
         interval = interval * 1000
         interval = interval / nextValues.length
         return tick(interval)
@@ -111,8 +112,8 @@ var museq = function() {
   function tr(s, fn) {
     fn = prime(slice(arguments, 2), fn)
 
-    return map(s, function(arr) {
-      return arr.map(fn, this)
+    return map(s, function(obj) {
+      return ensureArray(obj).map(fn, this)
     })
   }
 
@@ -199,6 +200,13 @@ var museq = function() {
     return exists(a)
       ? a
       : b
+  }
+
+
+  function ensureArray(x) {
+    return !isArray(x)
+      ? [x]
+      : x
   }
 
 
