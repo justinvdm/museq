@@ -15,7 +15,8 @@ var museq = function() {
 
 
   function loop(x, interval, origin) {
-    parseLoopOpts(arguments)
+    interval = deflt(interval, 2)
+    origin = deflt(origin, globalOrigin)
     var out = sig()
 
     vv(x)
@@ -45,21 +46,8 @@ var museq = function() {
   }
 
 
-  function parseLoopOpts(args) {
-    var interval = args[1]
-    var origin = args[2]
-
-    if (interval && typeof interval == 'object') {
-      origin = interval.origin
-      interval = interval.interval
-    }
-
-    interval = deflt(interval, 2)
-    origin = +deflt(origin, globalOrigin)
-  }
-
-
   function nextLoop(interval, origin) {
+    origin = +origin
     var now = +(new Date())
     var i = Math.ceil((now - origin) / interval)
     var then = origin + (i * interval)

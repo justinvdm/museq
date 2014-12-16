@@ -17,9 +17,6 @@ var museq = function() {
       spread = sig.spread,
       put = sig.put,
       then = sig.then,
-      depend = sig.depend,
-      except = sig.except,
-      filter = sig.filter,
       map = sig.map,
       redir = sig.redir
 
@@ -29,7 +26,8 @@ var museq = function() {
 
 
   function loop(x, interval, origin) {
-    parseLoopOpts(arguments)
+    interval = deflt(interval, 2)
+    origin = deflt(origin, globalOrigin)
     var out = sig()
 
     vv(x)
@@ -59,21 +57,8 @@ var museq = function() {
   }
 
 
-  function parseLoopOpts(args) {
-    var interval = args[1]
-    var origin = args[2]
-
-    if (interval && typeof interval == 'object') {
-      origin = interval.origin
-      interval = interval.interval
-    }
-
-    interval = deflt(interval, 2)
-    origin = +deflt(origin, globalOrigin)
-  }
-
-
   function nextLoop(interval, origin) {
+    origin = +origin
     var now = +(new Date())
     var i = Math.ceil((now - origin) / interval)
     var then = origin + (i * interval)
@@ -116,7 +101,7 @@ var museq = function() {
     fn = prime(slice(arguments, 3), fn)
 
     return map(s, function(x) {
-      return !(++i % n)
+      return ++i % n === 0
         ? fn.call(this, x)
         : x
     })
@@ -133,9 +118,11 @@ var museq = function() {
 
 
   function run(s) {
+    var args = slice(arguments, 1)
+
     return tr(s, function(obj) {
       return typeof obj == 'function'
-        ? return obj.apply(this, slice(arguments, 1))
+        ? obj.apply(this, args)
         : obj
     })
   }
