@@ -7,30 +7,31 @@ var museq = function() {
       put = sig.put,
       then = sig.then,
       depend = sig.depend,
-      except = sig.except
+      except = sig.except,
+      filter = sig.filter
 
   var globalOrigin = +(new Date())
+  var _slice = Array.prototype.slice
 
 
   function loop(x, interval, origin) {
     parseLoopOpts(arguments)
+    var out = sig()
 
-    var s = sig()
-    var curr
-
-    vv(ensure(x))
-      (then, function(x) { curr = x })
-      (depend, s)
+    vv(x)
+      (ensure)
+      (then, function(nextX) { x = nextX })
+      (depend, out)
 
     vv([interval, origin])
       (all)
       (update, spread(loopTick))
       (then, function() {
-        if (typeof curr != 'undefined') put(s, curr)
+        if (typeof x != 'undefined') put(out, x)
       })
-      (depend, s)
+      (depend, out)
 
-    return s
+    return out
   }
 
 
@@ -66,6 +67,44 @@ var museq = function() {
   }
 
 
+  function seq(values, interval) {
+    return vv(values)
+      (ensure)
+      (append, seqOnce, interval)
+  }
+  
+
+  function seqOnce(values, interval) {
+    interval = deflt(interval, 2)
+
+    var i = -1
+    var out = sig()
+
+    vv([values, interval])
+      (all)
+      (update, spread(function(nextValues, interval) {
+        values = nextValues
+        interval = interval * 1000
+        interval = interval / nextValues.length
+        return tick(interval)
+      }))
+      (then, function() {
+        if (++i < values.length) put(out, values[i])
+      })
+      (depend, out)
+
+    return out
+  }
+
+
+  function tr() {
+  }
+
+
+  function run() {
+  }
+
+
   function sleep(interval) {
     var s = sig()
     var delayId = setTimeout(resolve, interval, s)
@@ -91,48 +130,58 @@ var museq = function() {
   }
 
 
-  function update(s, fn) {
+  function append(s, fn) {
     var out = sig()
-    var curr
+    var args = slice(arguments, 2)
 
     vv(s)
-      (then, function(x) {
-        if (curr) reset(curr)
-        curr = fn(x)
-
-        var t
-        t = then(curr, puts)
-        t = except(t, raises)
-        depend(t, out)
-      })
+      (then, function(x) { applyOut(out, fn, x, args) })
       (depend, out)
-
-    function raises(e) {
-      put(out, e)
-    }
-
-    function puts(x) {
-      put(out, x)
-    }
 
     return out
   }
 
 
+  function update(s, fn) {
+    var out = sig()
+    var args = slice(arguments, 2)
+    var curr
+
+    vv(s)
+      (then, function(x) {
+        if (curr) reset(curr)
+        curr = applyOut(out, fn, x, args)
+      })
+      (depend, out)
+
+    return out
+  }
+
+
+  function applyOut(out, fn, x, args) {
+    var result = fn.apply(null, [x].concat(args))
+    if (!result) return
+
+    return vv(result)
+      (then, puts, out)
+      (except, raises, out)
+      (depend, out)
+      ()
+  }
+
+
+  function puts(x, s) {
+    put(s, x)
+  }
+
+
+  function raises(e, s) {
+    put(s, e)
+  }
+
+
   function resolve(s) {
     put(s, null)
-  }
-
-
-  function seq(v) {
-  }
-
-
-  function tr() {
-  }
-
-
-  function run() {
   }
 
 
@@ -144,8 +193,13 @@ var museq = function() {
 
 
   function exists(v) {
-    return typeof a != 'undefined'
-        && a !== null
+    return typeof v != 'undefined'
+        && v !== null
+  }
+
+
+  function slice(arr, a, b) {
+    return _slice.call(arr, a, b)
   }
 
 
@@ -153,8 +207,9 @@ var museq = function() {
     tr: tr,
     run: run,
     seq: seq,
+    seqOnce: seqOnce,
     loop: loop,
-    update: update
+    update: update,
   }
 }();
 museq;
