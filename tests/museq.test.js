@@ -1,6 +1,7 @@
 describe("museq", function() {
   var val = sig.val,
-      put = sig.put
+      put = sig.put,
+      then = sig.then
 
   var testUtils = museq.testUtils,
       fromNow = testUtils.fromNow,
@@ -11,7 +12,8 @@ describe("museq", function() {
 
   var loop = museq.loop,
       seq = museq.seq,
-      seqOnce = museq.seqOnce
+      seqOnce = museq.seqOnce,
+      every = museq.every
 
   describe(".loop", function() {
     it("should loop the given value", function(done) {
@@ -343,6 +345,48 @@ describe("museq", function() {
           results.should.deep.equal([20, 21, 22, 23])
         })
         (end, done)
+    })
+  })
+
+
+  describe(".every", function() {
+    it("should map every nth signal", function() {
+      var s = sig()
+      var results = []
+
+      vv(s)
+        (every, 3, function(x) { return -x })
+        (then, function(x) { results.push(x) })
+
+      vv(s)
+        (put, 1)
+        (put, 2)
+        (put, 3)
+        (put, 4)
+        (put, 5)
+        (put, 6)
+        (put, 7)
+        (put, 8)
+        (put, 9)
+        (put, 10)
+
+      assert.deepEqual(results, [1, 2, -3, 4, 5, -6, 7, 8, -9, 10])
+    })
+
+    it("should allow extra args", function() {
+      var s = sig()
+      var results = []
+
+      vv(s)
+        (every, 3, function(x, n) { return -x * n }, 2)
+        (then, function(x) { results.push(x) })
+
+      vv(s)
+        (put, 1)
+        (put, 2)
+        (put, 3)
+
+      assert.deepEqual(results, [1, 2, -6])
     })
   })
 

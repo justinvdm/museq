@@ -8,7 +8,8 @@ var museq = function() {
       then = sig.then,
       depend = sig.depend,
       except = sig.except,
-      filter = sig.filter
+      filter = sig.filter,
+      map = sig.map
 
   var globalOrigin = +(new Date())
   var _slice = Array.prototype.slice
@@ -94,6 +95,18 @@ var museq = function() {
       (depend, out)
 
     return out
+  }
+
+
+  function every(s, n, fn) {
+    var i = -n
+    var args = slice(arguments, 3)
+
+    return map(s, function(x) {
+      return !(++i % n)
+        ? fn.apply(this, [x].concat(args))
+        : x
+    })
   }
 
 
@@ -205,10 +218,11 @@ var museq = function() {
 
   return {
     tr: tr,
-    run: run,
     seq: seq,
-    seqOnce: seqOnce,
+    run: run,
     loop: loop,
+    every: every,
+    seqOnce: seqOnce,
     update: update,
   }
 }();

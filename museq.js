@@ -19,7 +19,8 @@ var museq = function() {
       then = sig.then,
       depend = sig.depend,
       except = sig.except,
-      filter = sig.filter
+      filter = sig.filter,
+      map = sig.map
 
   var globalOrigin = +(new Date())
   var _slice = Array.prototype.slice
@@ -27,20 +28,18 @@ var museq = function() {
 
   function loop(x, interval, origin) {
     parseLoopOpts(arguments)
-
     var out = sig()
-    var curr
 
     vv(x)
       (ensure)
-      (then, function(x) { curr = x })
+      (then, function(nextX) { x = nextX })
       (depend, out)
 
     vv([interval, origin])
       (all)
       (update, spread(loopTick))
       (then, function() {
-        if (typeof curr != 'undefined') put(out, curr)
+        if (typeof x != 'undefined') put(out, x)
       })
       (depend, out)
 
@@ -80,39 +79,45 @@ var museq = function() {
   }
 
 
-  function seq(s, interval) {
-    return vv(s)
+  function seq(values, interval) {
+    return vv(values)
       (ensure)
       (append, seqOnce, interval)
   }
   
 
-  function seqOnce(s, interval) {
+  function seqOnce(values, interval) {
     interval = deflt(interval, 2)
 
     var i = -1
-    var values
     var out = sig()
 
-    vv(x)
-      (ensure)
-      (then, function(x) { values = x })
-      (depend, out)
-
-    vv(interval)
-      (ensure)
-      (filter, function() { return !!values })
-      (update, function(interval) {
+    vv([values, interval])
+      (all)
+      (update, spread(function(nextValues, interval) {
+        values = nextValues
         interval = interval * 1000
-        interval = interval / values.length
+        interval = interval / nextValues.length
         return tick(interval)
-      })
+      }))
       (then, function() {
         if (++i < values.length) put(out, values[i])
       })
       (depend, out)
 
     return out
+  }
+
+
+  function every(s, n, fn) {
+    var i = -1
+    var args = slice(arguments, 3)
+
+    return map(s, function(x) {
+      return !(++i % n)
+        ? fn.apply(this, [x].concat(args))
+        : x
+    })
   }
 
 
@@ -178,8 +183,8 @@ var museq = function() {
 
 
   function applyOut(out, fn, x, args) {
-    var result = fn.apply(null, [x].concat(args)
-    if (!result) return null
+    var result = fn.apply(null, [x].concat(args))
+    if (!result) return
 
     return vv(result)
       (then, puts, out)
@@ -212,8 +217,8 @@ var museq = function() {
 
 
   function exists(v) {
-    return typeof a != 'undefined'
-        && a !== null
+    return typeof v != 'undefined'
+        && v !== null
   }
 
 
@@ -224,10 +229,11 @@ var museq = function() {
 
   return {
     tr: tr,
-    run: run,
     seq: seq,
-    seqOnce: seqOnce,
+    run: run,
     loop: loop,
+    every: every,
+    seqOnce: seqOnce,
     update: update,
   }
 }();
