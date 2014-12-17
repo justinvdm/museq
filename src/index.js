@@ -18,18 +18,20 @@ var museq = function() {
   function loop(x, interval, origin) {
     interval = deflt(interval, 2)
     origin = deflt(origin, globalOrigin)
+
+    var currX
     var out = sig()
 
     vv(x)
       (ensure)
-      (then, function(nextX) { x = nextX })
+      (then, function(nextX) { currX = nextX })
       (redir, out)
 
     vv([interval, origin])
       (all)
       (update, spread(loopTick))
       (then, function() {
-        if (typeof x != 'undefined') put(this, x)
+        if (typeof currX != 'undefined') put(this, currX)
       })
       (redir, out)
 
@@ -67,17 +69,19 @@ var museq = function() {
     interval = deflt(interval, 2)
 
     var i = -1
+    var currValues
     var out = sig()
 
     vv([values, interval])
       (all)
       (update, spread(function(nextValues, interval) {
+        currValues = nextValues
         interval = interval * 1000
         interval = interval / nextValues.length
         return tick(interval)
       }))
       (then, function() {
-        if (++i < values.length) put(this, values[i])
+        if (++i < currValues.length) put(this, currValues[i])
       })
       (redir, out)
 

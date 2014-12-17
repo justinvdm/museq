@@ -29,18 +29,20 @@ var museq = function() {
   function loop(x, interval, origin) {
     interval = deflt(interval, 2)
     origin = deflt(origin, globalOrigin)
+
+    var currX
     var out = sig()
 
     vv(x)
       (ensure)
-      (then, function(nextX) { x = nextX })
+      (then, function(nextX) { currX = nextX })
       (redir, out)
 
     vv([interval, origin])
       (all)
       (update, spread(loopTick))
       (then, function() {
-        if (typeof x != 'undefined') put(this, x)
+        if (typeof currX != 'undefined') put(this, currX)
       })
       (redir, out)
 
@@ -78,18 +80,19 @@ var museq = function() {
     interval = deflt(interval, 2)
 
     var i = -1
+    var currValues
     var out = sig()
 
     vv([values, interval])
       (all)
       (update, spread(function(nextValues, interval) {
-        values = ensureArray(nextValues)
+        currValues = nextValues
         interval = interval * 1000
         interval = interval / nextValues.length
         return tick(interval)
       }))
       (then, function() {
-        if (++i < values.length) put(this, values[i])
+        if (++i < currValues.length) put(this, currValues[i])
       })
       (redir, out)
 
@@ -113,7 +116,9 @@ var museq = function() {
     fn = prime(slice(arguments, 2), fn)
 
     return map(s, function(obj) {
-      return ensureArray(obj).map(fn, this)
+      return isArray(obj)
+        ? obj.map(fn, this)
+        : fn.call(this, obj)
     })
   }
 
@@ -200,13 +205,6 @@ var museq = function() {
     return exists(a)
       ? a
       : b
-  }
-
-
-  function ensureArray(x) {
-    return !isArray(x)
-      ? [x]
-      : x
   }
 
 
