@@ -229,6 +229,13 @@ var museq = function() {
   }
 
 
+  function ifExists(v, fn) {
+    return exists(v)
+      ? fn.call(this, v)
+      : v
+  }
+
+
   return {
     tr: tr,
     seq: seq,
@@ -237,7 +244,8 @@ var museq = function() {
     every: every,
     seqOnce: seqOnce,
     update: update,
-    append: append
+    append: append,
+    ifExists: ifExists
   }
 }();
 museq;

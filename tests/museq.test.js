@@ -18,7 +18,8 @@ describe("museq", function() {
       tr = museq.tr,
       run = museq.run,
       update = museq.update,
-      append = museq.append
+      append = museq.append,
+      ifExists = museq.ifExists
 
   describe(".loop", function() {
     it("should loop the given value", function(done) {
@@ -741,6 +742,22 @@ describe("museq", function() {
         (put, 5)
 
       assert.deepEqual(results, [1, 3, 5])
+    })
+  })
+
+  describe(".ifExists", function() {
+    it("should simply return the value if it is null", function() {
+      assert.strictEqual(ifExists(null, function(){}), null)
+    })
+
+    it("should simply return the value if it is undefined", function() {
+      assert.strictEqual(ifExists(void 0, function(){}), void 0)
+    })
+
+    it("should call the given function if the given value exists", function() {
+      function double(v) { return v * 2 }
+      assert.equal(ifExists(3, double), 6)
+      assert.equal(ifExists(23, double), 46)
     })
   })
 })
