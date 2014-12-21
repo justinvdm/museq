@@ -7,7 +7,8 @@ var museq = function() {
       put = sig.put,
       then = sig.then,
       map = sig.map,
-      redir = sig.redir
+      redir = sig.redir,
+      isSig = sig.isSig
 
 
   var globalOrigin = +(new Date())
@@ -150,10 +151,13 @@ var museq = function() {
 
   function append(s, fn) {
     var out = sig()
-    fn = prime(slice(arguments, 2), fn)
+    fn = prime(slice(arguments, 2), fn || identity)
 
     vv(s)
-      (then, function(x) { redir(fn(x), out) })
+      (then, function(x) {
+        var t = fn(x)
+        if (isSig(t)) redir(t, out)
+      })
       (redir, out)
 
     return out
@@ -163,12 +167,13 @@ var museq = function() {
   function update(s, fn) {
     var curr
     var out = sig()
-    fn = prime(slice(arguments, 2), fn)
+    fn = prime(slice(arguments, 2), fn || identity)
 
     vv(s)
       (then, function(x) {
         if (curr) reset(curr)
-        curr = redir(fn(x), out)
+        var t = fn(x)
+        if (isSig(t)) curr = redir(t, out)
       })
       (redir, out)
 
@@ -208,6 +213,11 @@ var museq = function() {
   }
 
 
+  function identity(x) {
+    return x
+  }
+
+
   return {
     tr: tr,
     seq: seq,
@@ -216,6 +226,7 @@ var museq = function() {
     every: every,
     seqOnce: seqOnce,
     update: update,
+    append: append
   }
 }();
 museq;
