@@ -30,7 +30,7 @@ var museq = function() {
 
     vv([interval, origin])
       (all)
-      (update, spread(loopTick))
+      (update, spread, loopTick)
       (then, function() {
         if (typeof currX != 'undefined') put(this, currX)
       })
@@ -75,12 +75,12 @@ var museq = function() {
 
     vv([values, interval])
       (all)
-      (update, spread(function(nextValues, interval) {
+      (update, spread, function(nextValues, interval) {
         currValues = nextValues
         interval = interval * 1000
         interval = interval / nextValues.length
         return tick(interval)
-      }))
+      })
       (then, function() {
         if (++i < currValues.length) put(this, currValues[i])
       })
