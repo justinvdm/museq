@@ -1,13 +1,13 @@
 
 (function(root, factory) {
   if (typeof define === 'function' && define.amd) {
-    define(["sig-js"], factory);
+    define(["drainpipe","sig-js"], factory);
   } else if (typeof exports === 'object') {
-    module.exports = factory(require('sig-js'));
+    module.exports = factory(require('drainpipe'), require('sig-js'));
   } else {
-    root.museq = factory(root.sig);
+    root.museq = factory(root.vv, root.sig);
   }
-}(this, function(sig) {
+}(this, function(vv, sig) {
 
 var museq = function() {
   var all = sig.all,

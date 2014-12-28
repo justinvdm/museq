@@ -11,6 +11,11 @@ gulp.task('build', function() {
       exports: 'museq',
       namespace: 'museq',
       deps: [{
+        name: 'vv',
+        amdName: 'drainpipe',
+        cjsName: 'drainpipe',
+        globalName: 'vv'
+      }, {
         name: 'sig',
         amdName: 'sig-js',
         cjsName: 'sig-js',
