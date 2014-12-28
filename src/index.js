@@ -17,7 +17,7 @@ var museq = function() {
 
 
   function loop(x, interval, origin) {
-    interval = deflt(interval, 2)
+    interval = deflt(interval, 1)
     origin = deflt(origin, globalOrigin)
 
     var currX
@@ -67,7 +67,7 @@ var museq = function() {
   
 
   function seqOnce(values, interval) {
-    interval = deflt(interval, 2)
+    interval = deflt(interval, 1)
 
     var i = -1
     var currValues
