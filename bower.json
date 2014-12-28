@@ -11,7 +11,7 @@
   "license": "MIT",
   "private": false,
   "dependencies": {
-    "sig-js": "~0.1.0",
+    "sig-js": "~0.1.0-alpha",
     "drainpipe": "~0.1.0"
   }
 }
