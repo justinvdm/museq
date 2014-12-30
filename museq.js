@@ -11,7 +11,6 @@
 
 var museq = function() {
   var all = sig.all,
-      reset = sig.reset,
       cleanup = sig.cleanup,
       ensureSig = sig.ensure,
       spread = sig.spread,
@@ -20,7 +19,10 @@ var museq = function() {
       map = sig.map,
       redir = sig.redir,
       isSig = sig.isSig,
-      val = sig.val
+      val = sig.val,
+      once = sig.once,
+      update = sig.update,
+      append = sig.append
 
 
   var globalOrigin = +(new Date())
@@ -41,6 +43,7 @@ var museq = function() {
 
     return vv([s.tempo, origin])
       (all)
+      (once)
       (update, spread, function(interval, origin) {
         return vv(nextIntersection(interval, origin))
           (sleep)
@@ -91,18 +94,6 @@ var museq = function() {
   }
 
 
-  function seqOnce(s) {
-    s = ensure(s)
-
-    var i = -1
-    var values
-    var out = sig()
-
-
-    return out
-  }
-
-
   function every(s, n, fn) {
     s = ensure(s)
     var i = -n
@@ -135,38 +126,6 @@ var museq = function() {
         ? obj.apply(this, args)
         : obj
     })
-  }
-
-
-  function append(s, fn) {
-    var out = sig()
-    fn = prime(slice(arguments, 2), fn || identity)
-
-    vv(s)
-      (then, function(x) {
-        var t = fn(x)
-        if (isSig(t)) redir(t, out)
-      })
-      (redir, out)
-
-    return out
-  }
-
-
-  function update(s, fn) {
-    var curr
-    var out = sig()
-    fn = prime(slice(arguments, 2), fn || identity)
-
-    vv(s)
-      (then, function(x) {
-        if (curr) reset(curr)
-        var t = fn(x)
-        if (isSig(t)) curr = redir(t, out)
-      })
-      (redir, out)
-
-    return out
   }
 
 
@@ -226,11 +185,6 @@ var museq = function() {
 
   function slice(arr, a, b) {
     return _slice.call(arr, a, b)
-  }
-
-
-  function identity(x) {
-    return x
   }
 
 

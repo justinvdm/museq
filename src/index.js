@@ -1,6 +1,5 @@
 var museq = function() {
   var all = sig.all,
-      reset = sig.reset,
       cleanup = sig.cleanup,
       ensureSig = sig.ensure,
       spread = sig.spread,
@@ -10,7 +9,9 @@ var museq = function() {
       redir = sig.redir,
       isSig = sig.isSig,
       val = sig.val,
-      once = sig.once
+      once = sig.once,
+      update = sig.update,
+      append = sig.append
 
 
   var globalOrigin = +(new Date())
@@ -117,38 +118,6 @@ var museq = function() {
   }
 
 
-  function append(s, fn) {
-    var out = sig()
-    fn = prime(slice(arguments, 2), fn || identity)
-
-    vv(s)
-      (then, function(x) {
-        var t = fn(x)
-        if (isSig(t)) redir(t, out)
-      })
-      (redir, out)
-
-    return out
-  }
-
-
-  function update(s, fn) {
-    var curr
-    var out = sig()
-    fn = prime(slice(arguments, 2), fn || identity)
-
-    vv(s)
-      (then, function(x) {
-        if (curr) reset(curr)
-        var t = fn(x)
-        if (isSig(t)) curr = redir(t, out)
-      })
-      (redir, out)
-
-    return out
-  }
-
-
   function nextIntersection(interval, origin) {
     origin = +origin
     var now = +(new Date())
@@ -208,11 +177,6 @@ var museq = function() {
   }
 
 
-  function identity(x) {
-    return x
-  }
-
-
   function ifExists(v, fn) {
     return exists(v)
       ? fn.call(this, v)
@@ -240,9 +204,6 @@ var museq = function() {
     sync: sync,
     every: every,
     tempo: tempo,
-    update: update,
-    append: append,
-    seqOnce: seqOnce,
     ifExists: ifExists
   }
 }();
