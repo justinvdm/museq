@@ -2,73 +2,188 @@ describe("museq", function() {
   var val = sig.val,
       put = sig.put,
       then = sig.then,
-      map = sig.map
+      map = sig.map,
+      all = sig.all,
+      spread = sig.spread
 
   var testUtils = museq.testUtils,
-      fromNow = testUtils.fromNow,
-      timeCheck = testUtils.timeCheck
+      timeCheck = testUtils.timeCheck,
+      fromNow = testUtils.fromNow
 
   var at = timeCheck.at,
       end = timeCheck.end
 
-  var loop = museq.loop,
+  var tempo = museq.tempo,
+      loop = museq.loop,
       seq = museq.seq,
-      seqOnce = museq.seqOnce,
       every = museq.every,
       tr = museq.tr,
       run = museq.run,
+      sync = museq.sync
       update = museq.update,
       append = museq.append,
-      ifExists = museq.ifExists
+      ifExists = museq.ifExists,
 
-  describe(".loop", function() {
-    it("should loop the given value", function(done) {
-      vv(loop(23, 0.1, fromNow(-5)))
+
+  describe(".tempo", function() {
+    it("should assign a tempo to signals", function(done) {
+      var s = tempo(val(23), 100)
+
+      vv([s, s.tempo])
+        (all)
+        (then, spread, function(v, ms) {
+          v.should.equal(23)
+          ms.should.equal(100)
+          done()
+        })
+    })
+
+    it("should assign a tempo to non-signals", function(done) {
+      var s = tempo(23, 100)
+
+      vv([s, s.tempo])
+        (all)
+        (then, spread, function(v, ms) {
+          v.should.equal(23)
+          ms.should.equal(100)
+          done()
+        })
+    })
+
+    it("should ensure tempos are sticky signals", function(done) {
+      var s = tempo(sig(), 100)
+
+      then(s.tempo, function(ms) {
+        ms.should.equal(100)
+
+        then(s.tempo, function(ms) {
+          ms.should.equal(100)
+          done()
+        })
+      })
+    })
+  })
+
+
+  describe(".sync", function() {
+    it("should delay a value until the next intersection", function(done) {
+      vv(23)
+        (tempo, 100)
+        (sync, fromNow(-50))
         (timeCheck)
         (at, 0, function(results) {
           results.should.be.empty
         })
-        (at, 110, function(results) {
+        (at, 60, function(results) {
           results.should.deep.equal([23])
-        })
-        (at, 210, function(results) {
-          results.should.deep.equal([23, 23])
-        })
-        (at, 310, function(results) {
-          results.should.deep.equal([23, 23,23])
-        })
-        (at, 410, function(results) {
-          results.should.deep.equal([23, 23, 23, 23])
-        })
-        (at, 510, function(results) {
-          results.should.deep.equal([23, 23, 23, 23, 23])
-        })
-        (at, 610, function(results) {
-          results.should.deep.equal([23, 23, 23, 23, 23, 23])
         })
         (end, done)
     })
 
-    it("should align loops to a given origin timestamp", function(done) {
-      vv(loop(23, 0.1, fromNow(-123)))
+    it("should delay early signals until the next intersection", function(done) {
+      vv([23])
+        (sig)
+        (tempo, 100)
+        (sync, fromNow(-50))
         (timeCheck)
         (at, 0, function(results) {
           results.should.be.empty
         })
-        (at, 10 + 123, function(results) {
+        (at, 60, function(results) {
           results.should.deep.equal([23])
         })
-        (at, 110 + 123, function(results) {
+        (end, done)
+    })
+
+    it("should not change the behavior of late signals", function(done) {
+      var s = sig()
+
+      vv(s)
+        (tempo, 100)
+        (sync, fromNow(-50))
+        (timeCheck)
+        (at, 0, function(results) {
+          results.should.be.empty
+        })
+        (at, 60, function(results) {
+          results.should.be.empty
+          put(s, 23)
+          results.should.deep.equal([23])
+        })
+        (end, done)
+    })
+
+    it("should only react to the initial tempo value", function(done) {
+      var t = val(100)
+
+      vv(23)
+        (tempo, t)
+        (sync, fromNow(-50))
+        (timeCheck)
+        (at, 0, function(results) {
+          results.should.be.empty
+        })
+        (at, 60, function(results) {
+          results.should.deep.equal([23])
+          put(t, 50)
+        })
+        (at, 110, function(results) {
+          results.should.deep.equal([23])
+        })
+        (at, 160, function(results) {
+          results.should.deep.equal([23])
+        })
+        (end, done)
+    })
+
+    it("should only react to the initial origin value", function(done) {
+      var origin = val(fromNow(-50))
+
+      vv(23)
+        (tempo, 100)
+        (sync, origin)
+        (timeCheck)
+        (at, 0, function(results) {
+          results.should.be.empty
+        })
+        (at, 60, function(results) {
+          results.should.deep.equal([23])
+          put(origin, fromNow(-5))
+        })
+        (at, 110, function(results) {
+          results.should.deep.equal([23])
+        })
+        (at, 160, function(results) {
+          results.should.deep.equal([23])
+        })
+        (end, done)
+    })
+  })
+
+
+  describe(".loop", function() {
+    it("should loop the given value", function(done) {
+      vv(23)
+        (tempo, 100)
+        (loop)
+        (timeCheck)
+        (at, 0, function(results) {
+          results.should.deep.equal([23])
+        })
+        (at, 110, function(results) {
           results.should.deep.equal([23, 23])
         })
-        (at, 210 + 123, function(results) {
-          results.should.deep.equal([23, 23, 23])
+        (at, 210, function(results) {
+          results.should.deep.equal([23, 23,23])
         })
-        (at, 310 + 123, function(results) {
+        (at, 310, function(results) {
           results.should.deep.equal([23, 23, 23, 23])
         })
-        (at, 410 + 123, function(results) {
+        (at, 410, function(results) {
           results.should.deep.equal([23, 23, 23, 23, 23])
+        })
+        (at, 510, function(results) {
+          results.should.deep.equal([23, 23, 23, 23, 23, 23])
         })
         (end, done)
     })
@@ -76,87 +191,57 @@ describe("museq", function() {
     it("should allow the value to be a signal", function(done) {
       var v = val(23)
 
-      vv(loop(v, 0.1, fromNow(-5)))
+      vv(v)
+        (tempo, 100)
+        (loop)
         (timeCheck)
         (at, 0, function(results) {
-          results.should.be.empty
-        })
-        (at, 110, function(results) {
           results.should.deep.equal([23])
         })
-        (at, 210, function(results) {
+        (at, 110, function(results) {
           results.should.deep.equal([23, 23])
         })
-        (at, 310, function(results) {
+        (at, 210, function(results) {
           results.should.deep.equal([23, 23, 23])
           put(v, 3)
         })
-        (at, 410, function(results) {
+        (at, 310, function(results) {
           results.should.deep.equal([23, 23, 23, 3])
         })
-        (at, 510, function(results) {
+        (at, 410, function(results) {
           results.should.deep.equal([23, 23, 23, 3, 3])
         })
-        (at, 610, function(results) {
+        (at, 510, function(results) {
           results.should.deep.equal([23, 23, 23, 3, 3, 3])
         })
         (end, done)
     })
 
-    it("should allow the interval to be a signal", function(done) {
-      var interval = val(0.1)
+    it("should allow the tempo to be a signal", function(done) {
+      var t = val(100)
 
-      vv(loop(23, interval, fromNow(-5)))
+      vv(23)
+        (tempo, t)
+        (loop)
         (timeCheck)
         (at, 0, function(results) {
-          results.should.be.empty
+          results.should.deep.equal([23])
         })
         (at, 110, function(results) {
-          results.should.deep.equal([23])
+          results.should.deep.equal([23, 23])
         })
         (at, 210, function(results) {
-          results.should.deep.equal([23, 23])
+          results.should.deep.equal([23, 23, 23])
+          put(t, 200)
         })
         (at, 310, function(results) {
-          results.should.deep.equal([23, 23, 23])
-          put(interval, 0.2)
+          results.should.deep.equal([23, 23, 23, 23])
         })
         (at, 520, function(results) {
-          results.should.deep.equal([23, 23, 23, 23])
+          results.should.deep.equal([23, 23, 23, 23, 23])
         })
         (at, 720, function(results) {
-          results.should.deep.equal([23, 23, 23, 23, 23])
-        })
-        (at, 920, function(results) {
           results.should.deep.equal([23, 23, 23, 23, 23, 23])
-        })
-        (end, done)
-    })
-
-    it("should allow the origin to be a signal", function(done) {
-      var origin = val(fromNow(-123))
-      var originB = fromNow(-182)
-
-      vv(loop(23, 0.1, origin))
-        (timeCheck)
-        (at, 0, function(results) {
-          results.should.be.empty
-        })
-        (at, 10 + 123, function(results) {
-          results.should.deep.equal([23])
-        })
-        (at, 110 + 123, function(results) {
-          results.should.deep.equal([23, 23])
-        })
-        (at, 210 + 123, function(results) {
-          results.should.deep.equal([23, 23, 23])
-          put(origin, originB)
-        })
-        (at, 310 + 182, function(results) {
-          results.should.deep.equal([23, 23, 23, 23])
-        })
-        (at, 410 + 182, function(results) {
-          results.should.deep.equal([23, 23, 23, 23, 23])
         })
         (end, done)
     })
@@ -165,7 +250,9 @@ describe("museq", function() {
 
   describe(".seq", function() {
     it("should sequence the given results", function(done) {
-      vv(seq([21, 22, 23], 0.3))
+      vv([21, 22, 23])
+        (tempo, 300)
+        (seq)
         (timeCheck)
         (at, 0, function(results) {
           results.should.deep.equal([21])
@@ -194,7 +281,9 @@ describe("museq", function() {
     it("should allow concurrent value groups using signals", function(done) {
       var values = val([21, 22, 23])
 
-      vv(seq(values, 0.6))
+      vv(values)
+        (tempo, 600)
+        (seq)
         (timeCheck)
         (at, 0, function(results) {
           results.should.deep.equal([21])
@@ -224,140 +313,19 @@ describe("museq", function() {
         (end, done)
     })
 
-    it("should allow the interval to be a signal", function(done) {
-      var interval = val(0.8)
+    it("should allow the tempo to be a signal", function(done) {
+      var t = val(800)
 
-      vv(seq([20, 21, 22, 23], interval))
+      vv([20, 21, 22, 23])
+        (tempo, t)
+        (seq)
         (timeCheck)
         (at, 0, function(results) {
           results.should.deep.equal([20])
         })
         (at, 210, function(results) {
           results.should.deep.equal([20, 21])
-          put(interval, 0.4)
-        })
-        (at, 310, function(results) {
-          results.should.deep.equal([20, 21, 22])
-        })
-        (at, 410, function(results) {
-          results.should.deep.equal([20, 21, 22, 23])
-        })
-        (at, 510, function(results) {
-          results.should.deep.equal([20, 21, 22, 23])
-        })
-        (at, 610, function(results) {
-          results.should.deep.equal([20, 21, 22, 23])
-        })
-        (at, 710, function(results) {
-          results.should.deep.equal([20, 21, 22, 23])
-        })
-        (at, 810, function(results) {
-          results.should.deep.equal([20, 21, 22, 23])
-        })
-        (end, done)
-    })
-  })
-
-
-  describe(".seqOnce", function() {
-    it("should sequence the given results", function(done) {
-      vv(seqOnce([21, 22, 23], 0.3))
-        (timeCheck)
-        (at, 0, function(results) {
-          results.should.deep.equal([21])
-        })
-        (at, 110, function(results) {
-          results.should.deep.equal([21, 22])
-        })
-        (at, 210, function(results) {
-          results.should.deep.equal([21, 22, 23])
-        })
-        (at, 310, function(results) {
-          results.should.deep.equal([21, 22, 23])
-        })
-        (at, 410, function(results) {
-          results.should.deep.equal([21, 22, 23])
-        })
-        (at, 510, function(results) {
-          results.should.deep.equal([21, 22, 23])
-        })
-        (at, 610, function(results) {
-          results.should.deep.equal([21, 22, 23])
-        })
-        (end, done)
-    })
-
-    it("should sequence the given results", function(done) {
-      vv(seqOnce([21, 22, 23], 0.3))
-        (timeCheck)
-        (at, 0, function(results) {
-          results.should.deep.equal([21])
-        })
-        (at, 110, function(results) {
-          results.should.deep.equal([21, 22])
-        })
-        (at, 210, function(results) {
-          results.should.deep.equal([21, 22, 23])
-        })
-        (at, 310, function(results) {
-          results.should.deep.equal([21, 22, 23])
-        })
-        (at, 410, function(results) {
-          results.should.deep.equal([21, 22, 23])
-        })
-        (at, 510, function(results) {
-          results.should.deep.equal([21, 22, 23])
-        })
-        (at, 610, function(results) {
-          results.should.deep.equal([21, 22, 23])
-        })
-        (end, done)
-    })
-
-    it("should allow the values to be a signal", function(done) {
-      var values = val([21, 22, 23])
-
-      vv(seqOnce(values, 0.6))
-        (timeCheck)
-        (at, 0, function(results) {
-          results.should.deep.equal([21])
-        })
-        (at, 210, function(results) {
-          results.should.deep.equal([21, 22])
-          put(values, [24, 25, 26, 27, 28, 29])
-        })
-        (at, 310, function(results) {
-          results.should.deep.equal([21, 22, 26])
-        })
-        (at, 410, function(results) {
-          results.should.deep.equal([21, 22, 26, 27])
-        })
-        (at, 510, function(results) {
-          results.should.deep.equal([21, 22, 26, 27, 28])
-        })
-        (at, 610, function(results) {
-          results.should.deep.equal([21, 22, 26, 27, 28, 29])
-        })
-        (at, 710, function(results) {
-          results.should.deep.equal([21, 22, 26, 27, 28, 29])
-        })
-        (at, 810, function(results) {
-          results.should.deep.equal([21, 22, 26, 27, 28, 29])
-        })
-        (end, done)
-    })
-
-    it("should allow the interval to be a signal", function(done) {
-      var interval = val(0.8)
-
-      vv(seqOnce([20, 21, 22, 23], interval))
-        (timeCheck)
-        (at, 0, function(results) {
-          results.should.deep.equal([20])
-        })
-        (at, 210, function(results) {
-          results.should.deep.equal([20, 21])
-          put(interval, 0.4)
+          put(t, 400)
         })
         (at, 310, function(results) {
           results.should.deep.equal([20, 21, 22])
@@ -549,6 +517,7 @@ describe("museq", function() {
     })
   })
 
+
   describe(".update", function() {
     it("should update the signal to use the last returned signal", function() {
       var s = sig()
@@ -642,6 +611,7 @@ describe("museq", function() {
       assert.deepEqual(results, [1, 3, 5])
     })
   })
+
 
   describe(".append", function() {
     it("should append each returned signal", function() {
@@ -744,6 +714,7 @@ describe("museq", function() {
       assert.deepEqual(results, [1, 3, 5])
     })
   })
+
 
   describe(".ifExists", function() {
     it("should simply return the value if it is null", function() {

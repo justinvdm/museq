@@ -2,13 +2,15 @@ var museq = function() {
   var all = sig.all,
       reset = sig.reset,
       cleanup = sig.cleanup,
-      ensure = sig.ensure,
+      ensureSig = sig.ensure,
       spread = sig.spread,
       put = sig.put,
       then = sig.then,
       map = sig.map,
       redir = sig.redir,
-      isSig = sig.isSig
+      isSig = sig.isSig,
+      val = sig.val,
+      once = sig.once
 
 
   var globalOrigin = +(new Date())
@@ -16,73 +18,45 @@ var museq = function() {
   var _slice = Array.prototype.slice
 
 
-  function loop(x, interval, origin) {
-    interval = deflt(interval, 1)
-    origin = deflt(origin, globalOrigin)
-
-    var currX
-    var out = sig()
-
-    vv(x)
-      (ensure)
-      (then, function(nextX) { currX = nextX })
-      (redir, out)
-
-    vv([interval, origin])
-      (all)
-      (update, spread, loopTick)
-      (then, function() {
-        if (typeof currX != 'undefined') put(this, currX)
-      })
-      (redir, out)
-
-    return out
+  function tempo(s, ms) {
+    s = ensure(s)
+    s.tempo = then(ensureSig(ms), val())
+    return s
   }
 
 
-  function loopTick(interval, origin) {
-    interval = interval * 1000
+  function sync(s, origin) {
+    s = ensure(s)
+    origin = origin || globalOrigin
 
-    return vv(nextLoop(interval, origin))
-      (sleep)
-      (update, function() { return tick(interval) })
+    return vv([s.tempo, origin])
+      (all)
+      (once)
+      (update, spread, function(interval, origin) {
+        return vv(nextIntersection(interval, origin))
+          (sleep)
+          (update, function() { return s })
+          ()
+      })
+      (tempo, s.tempo)
       ()
   }
 
 
-  function nextLoop(interval, origin) {
-    origin = +origin
-    var now = +(new Date())
-    var i = Math.ceil((now - origin) / interval)
-    var then = origin + (i * interval)
-    return then - now
-  }
+  function loop(s) {
+    s = ensure(s)
 
-
-  function seq(values, interval) {
-    return vv(values)
-      (ensure)
-      (append, seqOnce, interval)
-  }
-  
-
-  function seqOnce(values, interval) {
-    interval = deflt(interval, 1)
-
-    var i = -1
-    var currValues
+    var v
     var out = sig()
 
-    vv([values, interval])
-      (all)
-      (update, spread, function(nextValues, interval) {
-        currValues = nextValues
-        interval = interval * 1000
-        interval = interval / nextValues.length
-        return tick(interval)
-      })
+    vv(s)
+      (then, function(nextV) { v = nextV })
+      (redir, out)
+
+    vv(s.tempo)
+      (update, tick)
       (then, function() {
-        if (++i < currValues.length) put(this, currValues[i])
+        if (typeof v != 'undefined') put(this, v)
       })
       (redir, out)
 
@@ -90,7 +64,26 @@ var museq = function() {
   }
 
 
+  function seq(s) {
+    s = ensure(s)
+
+    return append(s, function(values) {
+      var i = -1
+
+      return vv(s.tempo)
+        (update, function(interval) {
+          return tick(interval / values.length)
+        })
+        (then, function() {
+          if (++i < values.length) put(this, values[i])
+        })
+        ()
+    })
+  }
+
+
   function every(s, n, fn) {
+    s = ensure(s)
     var i = -n
     fn = prime(slice(arguments, 3), fn)
 
@@ -121,31 +114,6 @@ var museq = function() {
         ? obj.apply(this, args)
         : obj
     })
-  }
-
-
-  function sleep(interval) {
-    var s = sig()
-    var delayId = setTimeout(resolve, interval, s)
-
-    cleanup(s, function() {
-      clearInterval(delayId)
-    })
-
-    return s
-  }
-
-
-  function tick(interval) {
-    var s = sig()
-    var intervalId = setInterval(resolve, interval, s)
-
-    cleanup(s, function() {
-      clearInterval(intervalId)
-    })
-
-    resolve(s)
-    return s
   }
 
 
@@ -181,6 +149,40 @@ var museq = function() {
   }
 
 
+  function nextIntersection(interval, origin) {
+    origin = +origin
+    var now = +(new Date())
+    var i = Math.ceil((now - origin) / interval)
+    var then = origin + (i * interval)
+    return then - now
+  }
+
+
+  function sleep(interval) {
+    var s = sig()
+    var delayId = setTimeout(resolve, interval, s)
+
+    cleanup(s, function() {
+      clearInterval(delayId)
+    })
+
+    return s
+  }
+
+
+  function tick(interval) {
+    var s = sig()
+    var intervalId = setInterval(resolve, interval, s)
+
+    cleanup(s, function() {
+      clearInterval(intervalId)
+    })
+
+    resolve(s)
+    return s
+  }
+
+
   function resolve(s) {
     put(s, null)
   }
@@ -192,13 +194,6 @@ var museq = function() {
     return function(x) {
       return fn.apply(this, [x].concat(args))
     }
-  }
-
-
-  function deflt(a, b) {
-    return exists(a)
-      ? a
-      : b
   }
 
 
@@ -225,15 +220,29 @@ var museq = function() {
   }
 
 
+  function ensure(v) {
+    if ((v || 0).museq) return v
+
+    // 'copy' signals to avoid assigning properties to non-museq signals
+    if (isSig(v)) v = then(v, sig())
+
+    v = ensureSig(v)
+    v.museq = true
+    return tempo(v, 2000)
+  }
+
+
   return {
     tr: tr,
     seq: seq,
     run: run,
     loop: loop,
+    sync: sync,
     every: every,
-    seqOnce: seqOnce,
+    tempo: tempo,
     update: update,
     append: append,
+    seqOnce: seqOnce,
     ifExists: ifExists
   }
 }();
