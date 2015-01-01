@@ -26,7 +26,6 @@ var museq = function() {
 
 
   var globalOrigin = +(new Date())
-  var isArray = Array.isArray
   var _slice = Array.prototype.slice
 
 
@@ -107,28 +106,6 @@ var museq = function() {
   }
 
 
-  function tr(s, fn) {
-    fn = prime(slice(arguments, 2), fn)
-
-    return map(s, function(obj) {
-      return isArray(obj)
-        ? obj.map(fn, this)
-        : fn.call(this, obj)
-    })
-  }
-
-
-  function run(s) {
-    var args = slice(arguments, 1)
-
-    return tr(s, function(obj) {
-      return typeof obj == 'function'
-        ? obj.apply(this, args)
-        : obj
-    })
-  }
-
-
   function nextIntersection(interval, origin) {
     origin = +origin
     var now = +(new Date())
@@ -177,21 +154,8 @@ var museq = function() {
   }
 
 
-  function exists(v) {
-    return typeof v != 'undefined'
-        && v !== null
-  }
-
-
   function slice(arr, a, b) {
     return _slice.call(arr, a, b)
-  }
-
-
-  function ifExists(v, fn) {
-    return exists(v)
-      ? fn.call(this, v)
-      : v
   }
 
 
@@ -214,11 +178,7 @@ var museq = function() {
     loop: loop,
     sync: sync,
     every: every,
-    tempo: tempo,
-    update: update,
-    append: append,
-    seqOnce: seqOnce,
-    ifExists: ifExists
+    tempo: tempo
   }
 }();
 museq;

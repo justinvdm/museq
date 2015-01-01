@@ -16,12 +16,9 @@ describe("museq", function() {
       loop = museq.loop,
       seq = museq.seq,
       every = museq.every,
-      tr = museq.tr,
-      run = museq.run,
       sync = museq.sync
       update = museq.update,
-      append = museq.append,
-      ifExists = museq.ifExists,
+      append = museq.append
 
 
   describe(".tempo", function() {
@@ -387,149 +384,6 @@ describe("museq", function() {
         (put, 3)
 
       assert.deepEqual(results, [1, 2, -6])
-    })
-  })
-
-
-  describe(".tr", function() {
-    it("should map each element in arrays given by the signal", function() {
-      var s = sig()
-      var results = []
-
-      vv(s)
-        (tr, function(x) { return -x })
-        (then, function(values) { results.push(values) })
-
-      vv(s)
-        (put, [1, 2, 3])
-        (put, [4, 5, 6])
-
-      assert.deepEqual(results, [
-        [-1, -2, -3],
-        [-4, -5, -6]])
-    })
-
-    it("should map single values", function() {
-      var s = sig()
-      var results = []
-
-      vv(s)
-        (tr, function(x) { return -x })
-        (then, function(values) { results.push(values) })
-
-      vv(s)
-        (put, 3)
-        (put, [4, 5, 6])
-
-      assert.deepEqual(results, [-3, [-4, -5, -6]])
-    })
-
-    it("should allow extra args", function() {
-      var s = sig()
-      var results = []
-
-      vv(s)
-        (tr, function(x, n) { return -x * n }, 2)
-        (then, function(values) { results.push(values) })
-
-      vv(s)
-        (put, [1, 2, 3])
-        (put, [4, 5, 6])
-
-      assert.deepEqual(results, [
-        [-2, -4, -6],
-        [-8, -10, -12]])
-    })
-  })
-
-
-  describe(".run", function() {
-    it("should map each function in each array to its result", function() {
-      var s = sig()
-      var results = []
-
-      vv(s)
-        (run)
-        (then, function(values) { results.push(values) })
-
-      vv(s)
-        (put, [a, b, a])
-        (put, [a, a, b])
-
-      assert.deepEqual(results, [
-        [0, 1, 0],
-        [0, 0, 1]])
-
-      function a() {
-        return 0
-      }
-
-      function b() {
-        return 1
-      }
-    })
-
-    it("should simply pass through non-functions", function() {
-      var s = sig()
-      var results = []
-
-      vv(s)
-        (run)
-        (then, function(values) { results.push(values) })
-
-      vv(s)
-        (put, [a, 1, a])
-        (put, [a, a, 1])
-
-      assert.deepEqual(results, [
-        [0, 1, 0],
-        [0, 0, 1]])
-
-      function a() {
-        return 0
-      }
-    })
-
-    it("should allow extra args", function() {
-      var s = sig()
-      var results = []
-
-      vv(s)
-        (run, 2)
-        (then, function(values) { results.push(values) })
-
-      vv(s)
-        (put, [a, b, a])
-        (put, [a, a, b])
-
-      assert.deepEqual(results, [
-        [4, 6, 4],
-        [4, 4, 6]])
-
-      function a(n) {
-        return n * 2
-      }
-
-      function b(n) {
-        return n * 3
-      }
-    })
-  })
-
-
-  describe(".ifExists", function() {
-    it("should simply return the value if it is null", function() {
-      assert.strictEqual(ifExists(null, function(){}), null)
-    })
-
-    it("should simply return the value if it is undefined", function() {
-      assert.strictEqual(ifExists(void 0, function(){}), void 0)
-    })
-
-    it("should call the given function if the given value exists", function() {
-      function double(v) { return v * 2 }
-      assert.equal(ifExists(3, double), 6)
-      assert.equal(ifExists(23, double), 46)
     })
   })
 })
