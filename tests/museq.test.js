@@ -12,8 +12,7 @@ describe("museq", function() {
   var at = timeCheck.at,
       end = timeCheck.end
 
-  var tempo = museq.tempo,
-      loop = museq.loop,
+  var loop = museq.loop,
       seq = museq.seq,
       every = museq.every,
       sync = museq.sync
@@ -21,51 +20,10 @@ describe("museq", function() {
       append = museq.append
 
 
-  describe(".tempo", function() {
-    it("should assign a tempo to signals", function(done) {
-      var s = tempo(val(23), 100)
-
-      vv([s, s.tempo])
-        (all)
-        (then, spread, function(v, ms) {
-          v.should.equal(23)
-          ms.should.equal(100)
-          done()
-        })
-    })
-
-    it("should assign a tempo to non-signals", function(done) {
-      var s = tempo(23, 100)
-
-      vv([s, s.tempo])
-        (all)
-        (then, spread, function(v, ms) {
-          v.should.equal(23)
-          ms.should.equal(100)
-          done()
-        })
-    })
-
-    it("should ensure tempos are sticky signals", function(done) {
-      var s = tempo(sig(), 100)
-
-      then(s.tempo, function(ms) {
-        ms.should.equal(100)
-
-        then(s.tempo, function(ms) {
-          ms.should.equal(100)
-          done()
-        })
-      })
-    })
-  })
-
-
   describe(".sync", function() {
     it("should delay a value until the next intersection", function(done) {
       vv(23)
-        (tempo, 100)
-        (sync, fromNow(-50))
+        (sync, fromNow(-50), 100)
         (timeCheck)
         (at, 0, function(results) {
           results.should.be.empty
@@ -79,8 +37,7 @@ describe("museq", function() {
     it("should delay early signals until the next intersection", function(done) {
       vv([23])
         (sig)
-        (tempo, 100)
-        (sync, fromNow(-50))
+        (sync, fromNow(-50), 100)
         (timeCheck)
         (at, 0, function(results) {
           results.should.be.empty
@@ -95,8 +52,7 @@ describe("museq", function() {
       var s = sig()
 
       vv(s)
-        (tempo, 100)
-        (sync, fromNow(-50))
+        (sync, fromNow(-50), 100)
         (timeCheck)
         (at, 0, function(results) {
           results.should.be.empty
@@ -113,8 +69,7 @@ describe("museq", function() {
       var t = val(100)
 
       vv(23)
-        (tempo, t)
-        (sync, fromNow(-50))
+        (sync, fromNow(-50), t)
         (timeCheck)
         (at, 0, function(results) {
           results.should.be.empty
@@ -136,8 +91,7 @@ describe("museq", function() {
       var origin = val(fromNow(-50))
 
       vv(23)
-        (tempo, 100)
-        (sync, origin)
+        (sync, origin, 100)
         (timeCheck)
         (at, 0, function(results) {
           results.should.be.empty
@@ -160,8 +114,7 @@ describe("museq", function() {
   describe(".loop", function() {
     it("should loop the given value", function(done) {
       vv(23)
-        (tempo, 100)
-        (loop)
+        (loop, 100)
         (timeCheck)
         (at, 0, function(results) {
           results.should.deep.equal([23])
@@ -188,8 +141,7 @@ describe("museq", function() {
       var v = val(23)
 
       vv(v)
-        (tempo, 100)
-        (loop)
+        (loop, 100)
         (timeCheck)
         (at, 0, function(results) {
           results.should.deep.equal([23])
@@ -217,8 +169,7 @@ describe("museq", function() {
       var t = val(100)
 
       vv(23)
-        (tempo, t)
-        (loop)
+        (loop, t)
         (timeCheck)
         (at, 0, function(results) {
           results.should.deep.equal([23])
@@ -247,8 +198,7 @@ describe("museq", function() {
   describe(".seq", function() {
     it("should sequence the given results", function(done) {
       vv([21, 22, 23])
-        (tempo, 300)
-        (seq)
+        (seq, 300)
         (timeCheck)
         (at, 0, function(results) {
           results.should.deep.equal([21])
@@ -278,8 +228,7 @@ describe("museq", function() {
       var values = val([21, 22, 23])
 
       vv(values)
-        (tempo, 600)
-        (seq)
+        (seq, 600)
         (timeCheck)
         (at, 0, function(results) {
           results.should.deep.equal([21])
@@ -313,8 +262,7 @@ describe("museq", function() {
       var t = val(800)
 
       vv([20, 21, 22, 23])
-        (tempo, t)
-        (seq)
+        (seq, t)
         (timeCheck)
         (at, 0, function(results) {
           results.should.deep.equal([20])

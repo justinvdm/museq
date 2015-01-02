@@ -11,36 +11,30 @@
 
 var museq = function() {
   var all = sig.all,
+      ensure = sig.ensure,
       cleanup = sig.cleanup,
-      ensureSig = sig.ensure,
       spread = sig.spread,
       put = sig.put,
       then = sig.then,
       map = sig.map,
       redir = sig.redir,
-      isSig = sig.isSig,
       val = sig.val,
       once = sig.once,
       update = sig.update,
       append = sig.append
 
 
+  var globalInterval = val(1000)
   var globalOrigin = +(new Date())
   var _slice = Array.prototype.slice
 
 
-  function tempo(s, ms) {
-    s = ensure(s)
-    s.tempo = then(ensureSig(ms), val())
-    return s
-  }
-
-
-  function sync(s, origin) {
+  function sync(s, origin, interval) {
     s = ensure(s)
     origin = origin || globalOrigin
+    interval = interval || globalInterval
 
-    return vv([s.tempo, origin])
+    return vv([interval, origin])
       (all)
       (once)
       (update, spread, function(interval, origin) {
@@ -49,13 +43,13 @@ var museq = function() {
           (update, function() { return s })
           ()
       })
-      (tempo, s.tempo)
       ()
   }
 
 
-  function loop(s) {
+  function loop(s, interval) {
     s = ensure(s)
+    interval = ensure(interval || globalInterval)
 
     var v
     var out = sig()
@@ -64,7 +58,7 @@ var museq = function() {
       (then, function(nextV) { v = nextV })
       (redir, out)
 
-    vv(s.tempo)
+    vv(interval)
       (update, tick)
       (then, function() {
         if (typeof v != 'undefined') put(this, v)
@@ -75,13 +69,18 @@ var museq = function() {
   }
 
 
-  function seq(s) {
+  function seq(s, interval) {
     s = ensure(s)
+
+    interval = vv(interval || globalInterval)
+      (ensure)
+      (then, val())
+      ()
 
     return append(s, function(values) {
       var i = -1
 
-      return vv(s.tempo)
+      return vv(interval)
         (update, function(interval) {
           return tick(interval / values.length)
         })
@@ -94,7 +93,6 @@ var museq = function() {
 
 
   function every(s, n, fn) {
-    s = ensure(s)
     var i = -n
     fn = prime(slice(arguments, 3), fn)
 
@@ -159,24 +157,11 @@ var museq = function() {
   }
 
 
-  function ensure(v) {
-    if ((v || 0).museq) return v
-
-    // 'copy' signals to avoid assigning properties to non-museq signals
-    if (isSig(v)) v = then(v, sig())
-
-    v = ensureSig(v)
-    v.museq = true
-    return tempo(v, 2000)
-  }
-
-
   return {
     seq: seq,
     loop: loop,
     sync: sync,
-    every: every,
-    tempo: tempo
+    every: every
   }
 }();
 museq;
