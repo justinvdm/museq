@@ -172,9 +172,7 @@ var museq = function() {
 
 
   return {
-    tr: tr,
     seq: seq,
-    run: run,
     loop: loop,
     sync: sync,
     every: every,
