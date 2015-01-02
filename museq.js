@@ -24,7 +24,7 @@ var museq = function() {
       append = sig.append
 
 
-  var globalInterval = val(1000)
+  var globalInterval = val(2000)
   var globalOrigin = +(new Date())
   var _slice = Array.prototype.slice
 
