@@ -19,16 +19,11 @@ var museq = function() {
   var _slice = Array.prototype.slice
 
 
-  function tempo(interval) {
-    put(globalInterval, interval)
-  }
-
-
-  function sync(s, origin, interval) {
+  function sync(v, origin, interval) {
     origin = origin || globalOrigin
     interval = interval || globalInterval
 
-    return vv([s, origin, interval])
+    return vv([v, origin, interval])
       (all)
       (update, spread, function(v, origin, interval) {
         return vv(nextIntersection(origin, interval))
@@ -40,8 +35,8 @@ var museq = function() {
   }
 
 
-  function loop(s, interval) {
-    s = ensure(s)
+  function loop(v, interval) {
+    var s = ensure(v)
     interval = ensureVal(interval || globalInterval)
 
     return update(s, function(v) {
@@ -53,8 +48,8 @@ var museq = function() {
   }
 
 
-  function seq(s, interval) {
-    s = ensure(s)
+  function seq(values, interval) {
+    var s = ensure(values)
     interval = ensureVal(interval || globalInterval)
 
     return append(s, function(values) {
@@ -155,7 +150,7 @@ var museq = function() {
     loop: loop,
     sync: sync,
     every: every,
-    tempo: tempo
+    interval: globalInterval
   }
 }();
 museq;
