@@ -1,5 +1,7 @@
 # museq
 
+![Build Status](https://api.travis-ci.org/justinvdm/museq.png)
+
 time-sequence things in javascript
 
 ```javascript
