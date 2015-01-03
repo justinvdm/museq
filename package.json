@@ -1,7 +1,7 @@
 {
   "name": "museq",
   "version": "0.0.0",
-  "description": "time-sequence things",
+  "description": "time-sequence things in javascript",
   "repository": {
     "type": "git",
     "url": "git://github.com/justinvdm/museq.git"

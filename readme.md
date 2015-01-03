@@ -1,6 +1,6 @@
 # museq
 
-time-sequence things
+time-sequence things in javascript
 
 ```javascript
 var vv = require('drainpipe'),

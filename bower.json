@@ -1,7 +1,12 @@
 {
   "name": "museq",
-  "authors": [
-    "justinvdm <justinvdm.0.1.0@gmail.com>"
+  "main": "museq.js",
+  "description": "time-sequence things in javascript",
+  "homepage": "https://github.com/justinvdm/museq",
+  "authors": ["justinvdm <justinvdm.0.1.0@gmail.com>"],
+  "keywords": [
+    "sequencing",
+    "music"
   ],
   "moduleType": [
     "amd",
