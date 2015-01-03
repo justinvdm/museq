@@ -12,19 +12,19 @@
 var museq = function() {
   var all = sig.all,
       ensure = sig.ensure,
+      ensureVal = sig.ensureVal,
       cleanup = sig.cleanup,
       spread = sig.spread,
       put = sig.put,
       then = sig.then,
       map = sig.map,
-      redir = sig.redir,
       val = sig.val,
       once = sig.once,
       update = sig.update,
       append = sig.append
 
 
-  var globalInterval = val(2000)
+  var globalInterval = val(1000)
   var globalOrigin = +(new Date())
   var _slice = Array.prototype.slice
 
@@ -49,33 +49,20 @@ var museq = function() {
 
   function loop(s, interval) {
     s = ensure(s)
-    interval = ensure(interval || globalInterval)
+    interval = ensureVal(interval || globalInterval)
 
-    var v
-    var out = sig()
-
-    vv(s)
-      (then, function(nextV) { v = nextV })
-      (redir, out)
-
-    vv(interval)
-      (update, tick)
-      (then, function() {
-        if (typeof v != 'undefined') put(this, v)
-      })
-      (redir, out)
-
-    return out
+    return update(s, function(v) {
+      return vv(interval)
+        (update, tick)
+        (map, function() { return v })
+        ()
+    })
   }
 
 
   function seq(s, interval) {
     s = ensure(s)
-
-    interval = vv(interval || globalInterval)
-      (ensure)
-      (then, val())
-      ()
+    interval = ensureVal(interval || globalInterval)
 
     return append(s, function(values) {
       var i = -1

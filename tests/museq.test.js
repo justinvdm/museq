@@ -1,9 +1,7 @@
 describe("museq", function() {
   var val = sig.val,
       put = sig.put,
-      then = sig.then,
-      all = sig.all,
-      spread = sig.spread
+      then = sig.then
 
   var testUtils = museq.testUtils,
       timeCheck = testUtils.timeCheck,
@@ -138,28 +136,35 @@ describe("museq", function() {
     })
 
     it("should allow the value to be a signal", function(done) {
-      var v = val(23)
+      var v = val()
 
       vv(v)
         (loop, 100)
         (timeCheck)
         (at, 0, function(results) {
+          results.should.be.empty
+        })
+        (at, 50, function(results) {
+          put(v, 23)
           results.should.deep.equal([23])
         })
         (at, 110, function(results) {
+          results.should.deep.equal([23])
+        })
+        (at, 160, function(results) {
           results.should.deep.equal([23, 23])
         })
-        (at, 210, function(results) {
+        (at, 260, function(results) {
           results.should.deep.equal([23, 23, 23])
           put(v, 3)
         })
-        (at, 310, function(results) {
+        (at, 360, function(results) {
           results.should.deep.equal([23, 23, 23, 3])
         })
-        (at, 410, function(results) {
+        (at, 460, function(results) {
           results.should.deep.equal([23, 23, 23, 3, 3])
         })
-        (at, 510, function(results) {
+        (at, 560, function(results) {
           results.should.deep.equal([23, 23, 23, 3, 3, 3])
         })
         (end, done)
