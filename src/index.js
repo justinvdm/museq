@@ -8,7 +8,6 @@ var museq = function() {
       then = sig.then,
       map = sig.map,
       val = sig.val,
-      once = sig.once,
       update = sig.update,
       append = sig.append,
       redir = sig.redir
