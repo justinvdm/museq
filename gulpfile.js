@@ -40,11 +40,16 @@ gulp.task('test', function() {
       'tests/**/*.test.js'
     ])
     .pipe(karma({
-      action: 'watch',
+      action: 'run',
       frameworks: ['mocha', 'chai'],
-      browsers: ['Chrome']
+      browsers: ['PhantomJS']
     }))
 })
 
 
 gulp.task('default', ['build', 'test'])
+
+
+gulp.task('watch', function() {
+  gulp.watch(['src/index.js', 'tests/**/*.js'], ['default']);
+});
