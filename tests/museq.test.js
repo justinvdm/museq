@@ -32,7 +32,7 @@ describe("museq", function() {
         (end, done)
     })
 
-    it("should delay early signals until the next intersection", function(done) {
+    it("should delay signals until the next intersection", function(done) {
       vv([23])
         (sig)
         (sync, fromNow(-50), 100)
@@ -41,67 +41,6 @@ describe("museq", function() {
           results.should.be.empty
         })
         (at, 60, function(results) {
-          results.should.deep.equal([23])
-        })
-        (end, done)
-    })
-
-    it("should not change the behavior of late signals", function(done) {
-      var s = sig()
-
-      vv(s)
-        (sync, fromNow(-50), 100)
-        (timeCheck)
-        (at, 0, function(results) {
-          results.should.be.empty
-        })
-        (at, 60, function(results) {
-          results.should.be.empty
-          put(s, 23)
-          results.should.deep.equal([23])
-        })
-        (end, done)
-    })
-
-    it("should only react to the initial tempo value", function(done) {
-      var t = val(100)
-
-      vv(23)
-        (sync, fromNow(-50), t)
-        (timeCheck)
-        (at, 0, function(results) {
-          results.should.be.empty
-        })
-        (at, 60, function(results) {
-          results.should.deep.equal([23])
-          put(t, 50)
-        })
-        (at, 110, function(results) {
-          results.should.deep.equal([23])
-        })
-        (at, 160, function(results) {
-          results.should.deep.equal([23])
-        })
-        (end, done)
-    })
-
-    it("should only react to the initial origin value", function(done) {
-      var origin = val(fromNow(-50))
-
-      vv(23)
-        (sync, origin, 100)
-        (timeCheck)
-        (at, 0, function(results) {
-          results.should.be.empty
-        })
-        (at, 60, function(results) {
-          results.should.deep.equal([23])
-          put(origin, fromNow(-5))
-        })
-        (at, 110, function(results) {
-          results.should.deep.equal([23])
-        })
-        (at, 160, function(results) {
           results.should.deep.equal([23])
         })
         (end, done)
@@ -170,7 +109,7 @@ describe("museq", function() {
         (end, done)
     })
 
-    it("should allow the tempo to be a signal", function(done) {
+    it("should allow the interval to be a signal", function(done) {
       var t = val(100)
 
       vv(23)
@@ -187,13 +126,13 @@ describe("museq", function() {
           put(t, 200)
         })
         (at, 310, function(results) {
-          results.should.deep.equal([23, 23, 23, 23])
+          results.should.deep.equal([23, 23, 23])
         })
         (at, 520, function(results) {
-          results.should.deep.equal([23, 23, 23, 23, 23])
+          results.should.deep.equal([23, 23, 23, 23])
         })
         (at, 720, function(results) {
-          results.should.deep.equal([23, 23, 23, 23, 23, 23])
+          results.should.deep.equal([23, 23, 23, 23, 23])
         })
         (end, done)
     })
@@ -263,7 +202,7 @@ describe("museq", function() {
         (end, done)
     })
 
-    it("should allow the tempo to be a signal", function(done) {
+    it("should allow the interval to be a signal", function(done) {
       var t = val(800)
 
       vv([20, 21, 22, 23])
@@ -277,10 +216,10 @@ describe("museq", function() {
           put(t, 400)
         })
         (at, 310, function(results) {
-          results.should.deep.equal([20, 21, 22])
+          results.should.deep.equal([20, 21])
         })
         (at, 410, function(results) {
-          results.should.deep.equal([20, 21, 22, 23])
+          results.should.deep.equal([20, 21, 22])
         })
         (at, 510, function(results) {
           results.should.deep.equal([20, 21, 22, 23])

@@ -10,7 +10,8 @@ var museq = function() {
       val = sig.val,
       once = sig.once,
       update = sig.update,
-      append = sig.append
+      append = sig.append,
+      redir = sig.redir
 
 
   var globalInterval = val(1000)
@@ -18,18 +19,21 @@ var museq = function() {
   var _slice = Array.prototype.slice
 
 
+  function tempo(interval) {
+    put(globalInterval, interval)
+  }
+
+
   function sync(s, origin, interval) {
-    s = ensure(s)
     origin = origin || globalOrigin
     interval = interval || globalInterval
 
-    return vv([interval, origin])
+    return vv([s, origin, interval])
       (all)
-      (once)
-      (update, spread, function(interval, origin) {
-        return vv(nextIntersection(interval, origin))
+      (update, spread, function(v, origin, interval) {
+        return vv(nextIntersection(origin, interval))
           (sleep)
-          (update, function() { return s })
+          (map, function() { return v })
           ()
       })
       ()
@@ -42,7 +46,7 @@ var museq = function() {
 
     return update(s, function(v) {
       return vv(interval)
-        (update, tick)
+        (tick)
         (map, function() { return v })
         ()
     })
@@ -57,9 +61,8 @@ var museq = function() {
       var i = -1
 
       return vv(interval)
-        (update, function(interval) {
-          return tick(interval / values.length)
-        })
+        (div, values.length)
+        (tick)
         (then, function() {
           if (++i < values.length) put(this, values[i])
         })
@@ -80,7 +83,7 @@ var museq = function() {
   }
 
 
-  function nextIntersection(interval, origin) {
+  function nextIntersection(origin, interval) {
     origin = +origin
     var now = +(new Date())
     var i = Math.ceil((now - origin) / interval)
@@ -90,27 +93,41 @@ var museq = function() {
 
 
   function sleep(interval) {
-    var s = sig()
-    var delayId = setTimeout(resolve, interval, s)
-
-    cleanup(s, function() {
-      clearInterval(delayId)
-    })
-
-    return s
+    return vv(interval)
+      (ensure)
+      (update, function(interval) {
+        var s = sig()
+        var intervalId = setTimeout(resolve, interval, s)
+        cleanup(s, function() { clearTimeout(intervalId) })
+        return s
+      })
+      ()
   }
 
 
   function tick(interval) {
-    var s = sig()
-    var intervalId = setInterval(resolve, interval, s)
+    var out = sig()
 
-    cleanup(s, function() {
-      clearInterval(intervalId)
-    })
+    vv(interval)
+      (ensure)
+      (update, function(interval) {
+        var s = sig()
+        var intervalId = setInterval(resolve, interval, s)
+        cleanup(s, function() { clearInterval(intervalId) })
+        return s
+      })
+      (redir, out)
 
-    resolve(s)
-    return s
+    resolve(out)
+    return out
+  }
+
+
+  function div(a, b) {
+    return vv([a, b])
+      (all)
+      (map, spread, function(a, b) { return a / b })
+      ()
   }
 
 
@@ -137,7 +154,8 @@ var museq = function() {
     seq: seq,
     loop: loop,
     sync: sync,
-    every: every
+    every: every,
+    tempo: tempo
   }
 }();
 museq;
