@@ -13,13 +13,13 @@ var museq = function() {
   var all = sig.all,
       ensure = sig.ensure,
       ensureVal = sig.ensureVal,
-      cleanup = sig.cleanup,
+      setup = sig.setup,
+      teardown = sig.teardown,
       spread = sig.spread,
       put = sig.put,
       then = sig.then,
       map = sig.map,
       val = sig.val,
-      once = sig.once,
       update = sig.update,
       append = sig.append,
       redir = sig.redir
@@ -103,8 +103,9 @@ var museq = function() {
       (ensure)
       (update, function(interval) {
         var s = sig()
-        var intervalId = setTimeout(resolve, interval, s)
-        cleanup(s, function() { clearTimeout(intervalId) })
+        var id
+        setup(s, function() { id = setTimeout(resolve, interval, s) })
+        teardown(s, function() { clearTimeout(id) })
         return s
       })
       ()
@@ -118,8 +119,9 @@ var museq = function() {
       (ensure)
       (update, function(interval) {
         var s = sig()
-        var intervalId = setInterval(resolve, interval, s)
-        cleanup(s, function() { clearInterval(intervalId) })
+        var id
+        setup(s, function() { id = setInterval(resolve, interval, s) })
+        teardown(s, function() { clearInterval(id) })
         return s
       })
       (redir, out)

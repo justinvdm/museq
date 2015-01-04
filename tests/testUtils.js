@@ -3,7 +3,8 @@ museq.testUtils = function() {
       then = sig.then,
       reset = sig.reset,
       except = sig.except,
-      cleanup = sig.cleanup,
+      setup = sig.setup,
+      teardown = sig.teardown,
       put = sig.put,
       map = sig.map
 
@@ -30,12 +31,13 @@ museq.testUtils = function() {
 
   timeCheck.at = function(d, ms, fn) {
     var s = sig()
+    var id 
+    
+    setup(s, function() {
+      id = setTimeout(put, ms, s, d.state)
+    })
 
-    var id = setTimeout(function() {
-      put(s, d.state)
-    }, ms)
-
-    cleanup(s, function() {
+    teardown(s, function() {
       clearTimeout(id)
     })
 

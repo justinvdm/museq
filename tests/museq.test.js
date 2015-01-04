@@ -103,9 +103,9 @@ describe("museq", function() {
         (at, 460, function(results) {
           results.should.deep.equal([23, 23, 23, 3, 3])
         })
-        (at, 560, function(results) {
-          results.should.deep.equal([23, 23, 23, 3, 3, 3])
-        })
+        //(at, 560, function(results) {
+        //  results.should.deep.equal([23, 23, 23, 3, 3, 3])
+        //})
         (end, done)
     })
 
