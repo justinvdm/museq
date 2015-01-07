@@ -12,6 +12,10 @@
   },
   "author": "justinvdm",
   "license": "MIT",
+  "dependencies": {
+    "sig-js": "~0.1.1",
+    "drainpipe": "~0.1.0"
+  },
   "devDependencies": {
     "chai": "^1.9.1",
     "gulp": "^3.8.7",
