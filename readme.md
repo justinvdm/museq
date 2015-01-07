@@ -58,6 +58,10 @@ node:
 $ npm install museq
 ```
 
+```
+var museq = require('museq')
+```
+
 browser:
 
 ```
@@ -65,6 +69,8 @@ $ bower install museq
 ```
 
 ```html
+<script src="/bower_components/drainpipe/drainpipe.js"></script>
+<script src="/bower_components/sig-js/sig.js"></script>
 <script src="/bower_components/museq/museq.js"></script>
 ```
 
