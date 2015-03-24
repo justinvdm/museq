@@ -11,11 +11,6 @@ gulp.task('build', function() {
       exports: 'museq',
       namespace: 'museq',
       deps: [{
-        name: 'vv',
-        amdName: 'drainpipe',
-        cjsName: 'drainpipe',
-        globalName: 'vv'
-      }, {
         name: 'sig',
         amdName: 'sig-js',
         cjsName: 'sig-js',
@@ -42,7 +37,7 @@ gulp.task('test', function() {
     .pipe(karma({
       action: 'run',
       frameworks: ['mocha', 'chai'],
-      browsers: ['PhantomJS']
+      browsers: ['SlimerJS']
     }))
 })
 
@@ -53,3 +48,6 @@ gulp.task('default', ['build', 'test'])
 gulp.task('watch', function() {
   gulp.watch(['src/index.js', 'tests/**/*.js'], ['default']);
 });
+
+
+process.env.SLIMERJS_BIN = 'node_modules/.bin/slimerjs'
