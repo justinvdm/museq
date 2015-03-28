@@ -1,91 +1,89 @@
 
 (function(root, factory) {
   if (typeof define === 'function' && define.amd) {
-    define(["drainpipe","sig-js"], factory);
+    define(["sig-js"], factory);
   } else if (typeof exports === 'object') {
-    module.exports = factory(require('drainpipe'), require('sig-js'));
+    module.exports = factory(require('sig-js'));
   } else {
-    root.museq = factory(root.vv, root.sig);
+    root.museq = factory(root.sig);
   }
-}(this, function(vv, sig) {
+}(this, function(sig) {
 
-var museq = function() {
-  var all = sig.all,
-      ensure = sig.ensure,
-      ensureVal = sig.ensureVal,
-      setup = sig.setup,
-      teardown = sig.teardown,
-      spread = sig.spread,
-      put = sig.put,
-      then = sig.then,
-      map = sig.map,
-      val = sig.val,
-      update = sig.update,
-      append = sig.append,
-      redir = sig.redir
+;(function() {
+  museq = {}
+  museq.interval = sig.val(1000)
+  museq.origin = +(new Date())
 
 
-  var globalInterval = val(1000)
-  var globalOrigin = +(new Date())
-  var _slice = Array.prototype.slice
-
-
-  function sync(v, origin, interval) {
+  museq.sync = function(v, origin, interval) {
     origin = origin || globalOrigin
     interval = interval || globalInterval
 
-    return vv([v, origin, interval])
-      (all)
-      (update, spread, function(v, origin, interval) {
-        return vv(nextIntersection(origin, interval))
-          (sleep)
-          (map, function() { return v })
-          ()
+    return sig.all([v, origin, interval])
+      .update(sig.spread, function(v, origin, interval) {
+        var intersection = nextIntersection(origin, interval)
+        return museq.sleep(intersection).map(v)
       })
-      ()
+      .then(sig.val())
   }
 
 
-  function loop(v, interval) {
-    var s = ensure(v)
-    interval = ensureVal(interval || globalInterval)
+  museq.loop = function(v, interval) {
+    interval = sig.ensureVal(interval || globalInterval)
 
-    return update(s, function(v) {
-      return vv(interval)
-        (tick)
-        (map, function() { return v })
-        ()
-    })
+    return sig.all([v, museq.tick(interval)])
+      .map(sig.spread, sig.identity)
   }
 
 
-  function seq(values, interval) {
-    var s = ensure(values)
-    interval = ensureVal(interval || globalInterval)
+  museq.seq = function(values, interval) {
+    var s = sig.ensureVal(values)
+    interval = sig.ensureVal(interval || globalInterval)
 
-    return append(s, function(values) {
+    return s.append(function(values) {
       var i = -1
 
-      return vv(interval)
-        (div, values.length)
-        (tick)
-        (then, function() {
-          if (++i < values.length) put(this, values[i])
+      return div(interval, values.length)
+        .call(museq.tick)
+        .each(function() {
+          if (++i < values.length) this.put(values[i])
         })
-        ()
     })
   }
 
 
-  function every(s, n, fn) {
+  museq.every = function(s, n, fn) {
     var i = -n
-    fn = prime(slice(arguments, 3), fn)
+    fn = sig.prime(sig.slice(arguments, 3), fn)
 
-    return map(s, function(x) {
+    return s.map(function(x) {
       return ++i % n === 0
         ? fn.call(this, x)
         : x
     })
+  }
+
+
+  museq.sleep = function(interval) {
+    return sig.ensureVal(interval)
+      .update(function(interval) {
+        var s = sig()
+        var id = setTimeout(sig.resolve, interval, s)
+        s.teardown(function() { clearTimeout(id) })
+        return s
+      })
+  }
+
+
+  museq.tick = function(interval) {
+    return sig.ensureVal(interval)
+      .update(function(interval) {
+        var s = sig()
+        var id = setInterval(sig.put, interval, s)
+        s.teardown(function() { clearInterval(id) })
+        return s
+      })
+      .put()
   }
 
 
@@ -98,75 +96,14 @@ var museq = function() {
   }
 
 
-  function sleep(interval) {
-    return vv(interval)
-      (ensure)
-      (update, function(interval) {
-        var s = sig()
-        var id
-        setup(s, function() { id = setTimeout(resolve, interval, s) })
-        teardown(s, function() { clearTimeout(id) })
-        return s
-      })
-      ()
-  }
-
-
-  function tick(interval) {
-    var out = sig()
-
-    vv(interval)
-      (ensure)
-      (update, function(interval) {
-        var s = sig()
-        var id
-        setup(s, function() { id = setInterval(resolve, interval, s) })
-        teardown(s, function() { clearInterval(id) })
-        return s
-      })
-      (redir, out)
-
-    resolve(out)
-    return out
-  }
-
-
   function div(a, b) {
-    return vv([a, b])
-      (all)
-      (map, spread, function(a, b) { return a / b })
-      ()
+    return sig.all([a, b])
+      .map(sig.spread, function(a, b) { return a / b })
   }
 
 
-  function resolve(s) {
-    put(s, null)
-  }
-
-
-  function prime(args, fn) {
-    if (!args.length) return fn
-
-    return function(x) {
-      return fn.apply(this, [x].concat(args))
-    }
-  }
-
-
-  function slice(arr, a, b) {
-    return _slice.call(arr, a, b)
-  }
-
-
-  return {
-    seq: seq,
-    loop: loop,
-    sync: sync,
-    every: every,
-    interval: globalInterval
-  }
-}();
-museq;
+  return museq
+})();
 
 return museq;
 

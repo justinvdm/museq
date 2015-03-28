@@ -17,7 +17,6 @@
   "private": false,
   "ignore": [],
   "dependencies": {
-    "sig-js": "~0.1.1",
-    "drainpipe": "~0.1.0"
+    "sig-js": "~0.3"
   }
 }

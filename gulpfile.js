@@ -29,9 +29,7 @@ gulp.task('test', function() {
   return gulp
     .src([
       'bower_components/sig-js/sig.js',
-      'bower_components/drainpipe/drainpipe.js',
       'src/index.js',
-      'tests/testUtils.js',
       'tests/**/*.test.js'
     ])
     .pipe(karma({
