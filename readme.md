@@ -5,27 +5,22 @@
 time-sequence things in javascript
 
 ```javascript
-var vv = require('drainpipe'),
-    format = require('util').format,
-    then = require('sig-js').then,
-    museq = require('museq'),
-    loop = museq.loop,
-    every = museq.every,
-    seq = museq.seq
+var str = require('util').format,
+    sig = require('sig-js'),
+    museq = require('museq')
 
 
 var i = 0
 
-vv([1, 2, 3, 4])
-  (loop)
-  (every, 2, function(values) {
-    return values.slice(0, 3)
-  })
-  (seq)
-  (then, function(v) {
-    console.log(format('%d (%ds)', v, i++))
-  })
-
+museq.loop([1, 2, 3, 4])
+ .call(museq.every, 2, function(values) {
+   return values.slice(0, 3)
+ })
+ .call(museq.seq)
+ .map(function(v) {
+   return str('%d (%ds)', v, i++)
+ })
+ .each(sig.log)
 
 // 1 (0s)
 // 2 (1s)
@@ -88,8 +83,8 @@ If a value is given as `v`, the value will be outputted by the returned signal w
 `interval` should be given in milliseconds. If `interval` isn't given, [the global interval](#interval) is used. If `interval` is a signal, a new sync will occur each time `interval` outputs a new value.
 
 ```javascript
-var s = sync(23, +(new Date()) - 500, 1000)
-then(s, log)
+var s = museq.sync(23, +(new Date()) - 500, 1000)
+s.each(sig.log)
 
 // 500 milliseconds later ...
 // 23
@@ -104,8 +99,8 @@ If a value is given as `v`, the value will be outputted by the returned signal e
 `interval` should be given in milliseconds. If `interval` isn't given, [the global interval](#interval) is used. If `interval` is a signal, each value it outputs will cause the returned signal to output subsequent values at the new interval value.
 
 ```javascript
-var s = loop(23, 1000)
-then(s, log)
+museq.loop(23, 1000)
+  .each(sig.log)
 
 // 23
 
@@ -131,8 +126,8 @@ If an array is given as `values`, each value in the array will be outputted at t
 
 
 ```javascript
-var s = seq([1, 2, 3, 4], 4000)
-then(s, log)
+museq.seq([1, 2, 3, 4], 4000)
+  .each(sig.log)
 
 // 1
 
@@ -152,10 +147,12 @@ Takes in a signal `s` and returns a new signal that maps each `n`th value throug
 
 
 ```javascript
-var s = sig([1, 2, 3, 4])
-var t = every(s, 2, function(v) { return v * 2 })
-then(t, log)
+var s = sig()
 
+s.every(s, 2, function(v) { return v * 2 })
+ .each(sig.log)
+
+s.putEach([1, 2, 3, 4])
 // 1
 // 4
 // 3
@@ -168,9 +165,9 @@ then(t, log)
 `museq.interval` is the global interval used as a default for `sync`, `loop` and `seq`. It is a signal, so any new value given to it will cause any currently active signals listening to it to react to the new value. The signal is initialised to `2000` milliseconds.
 
 ```javascript
-put(museq.interval, 500)
+museq.interval.put(500)
 // all existing and new museq signals will now use 500 milliseconds as their interval
 
-put(museq.interval, 1000)
+museq.interval.put(1000)
 // all existing and new museq signals will now use 1000 milliseconds as their interval
 ```
