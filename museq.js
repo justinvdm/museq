@@ -16,8 +16,8 @@
 
 
   museq.sync = function(v, origin, interval) {
-    origin = origin || globalOrigin
-    interval = interval || globalInterval
+    origin = origin || museq.origin
+    interval = interval || museq.interval
 
     return sig.all([v, origin, interval])
       .update(sig.spread, function(v, origin, interval) {
@@ -29,7 +29,7 @@
 
 
   museq.loop = function(v, interval) {
-    interval = sig.ensureVal(interval || globalInterval)
+    interval = sig.ensureVal(interval || museq.interval)
 
     return sig.all([v, museq.tick(interval)])
       .map(sig.spread, sig.identity)
@@ -38,7 +38,7 @@
 
   museq.seq = function(values, interval) {
     var s = sig.ensureVal(values)
-    interval = sig.ensureVal(interval || globalInterval)
+    interval = sig.ensureVal(interval || museq.interval)
 
     return s.append(function(values) {
       var i = -1
