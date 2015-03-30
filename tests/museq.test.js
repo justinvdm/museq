@@ -27,20 +27,19 @@ describe("museq", function() {
 
     function self(s) {
       var values = []
-      var t = sig()
 
-      var u = t
+      var t = sig(tasks)
         .append(sig.spread, function(interval, fn) {
           return museq.sleep(interval)
             .map(function() { return fn(values) })
         })
         .limit(tasks.length)
+        .each(function() { this.next() })
 
       s.each(function(x) { values.push(x) })
-       .redir(u)
+       .redir(t)
 
-      t.putEach(tasks)
-      return u
+      return t
     }
 
     return self
