@@ -35,7 +35,7 @@ gulp.task('test', function() {
     .pipe(karma({
       action: 'run',
       frameworks: ['mocha', 'chai'],
-      browsers: ['SlimerJS']
+      browsers: ['PhantomJS']
     }))
 })
 
@@ -46,6 +46,3 @@ gulp.task('default', ['build', 'test'])
 gulp.task('watch', function() {
   gulp.watch(['src/index.js', 'tests/**/*.js'], ['default']);
 });
-
-
-process.env.SLIMERJS_BIN = 'node_modules/.bin/slimerjs'
