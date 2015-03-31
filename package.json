@@ -13,8 +13,7 @@
   "author": "justinvdm",
   "license": "MIT",
   "dependencies": {
-    "sig-js": "~0.3",
-    "drainpipe": "~0.1.0"
+    "sig-js": "~0.3"
   },
   "devDependencies": {
     "chai": "^1.9.1",
