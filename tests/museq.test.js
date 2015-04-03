@@ -9,9 +9,10 @@ describe("museq", function() {
     fn = sig.prime(sig.slice(arguments, 2), fn || sig.identity)
 
     s.then(function(v) {
-      results.push(v)
-      this.next()
-    })
+       results.push(v)
+       this.next()
+     })
+     .done()
 
     return fn(results)
   }
@@ -34,7 +35,7 @@ describe("museq", function() {
             .map(function() { return fn(values) })
         })
         .limit(tasks.length)
-        .each(function() { this.next() })
+        .done()
 
       s.each(function(x) { values.push(x) })
        .redir(t)
@@ -56,7 +57,7 @@ describe("museq", function() {
           .at(60, function(results) {
             results.should.deep.equal([23])
           }))
-        .teardown(done)
+        .done(done)
     })
 
     it("should delay signals until the next intersection", function(done) {
@@ -70,7 +71,7 @@ describe("museq", function() {
           .at(60, function(results) {
             results.should.deep.equal([23])
           }))
-        .teardown(done)
+        .done(done)
 
       s.put(23)
     })
@@ -99,7 +100,7 @@ describe("museq", function() {
           .at(510, function(results) {
             results.should.deep.equal([23, 23, 23, 23, 23, 23])
           }))
-        .teardown(done)
+        .done(done)
     })
 
     it("should allow the value to be a signal", function(done) {
@@ -133,7 +134,7 @@ describe("museq", function() {
           .at(560, function(results) {
             results.should.deep.equal([23, 23, 23, 3, 3, 3, 3])
           }))
-        .teardown(done)
+        .done(done)
     })
 
     it("should allow the interval to be a signal", function(done) {
@@ -160,7 +161,7 @@ describe("museq", function() {
           .at(720, function(results) {
             results.should.deep.equal([23, 23, 23, 23, 23])
           }))
-        .teardown(done)
+        .done(done)
     })
   })
 
@@ -190,7 +191,7 @@ describe("museq", function() {
           .at(610, function(results) {
             results.should.deep.equal([21, 22, 23])
           }))
-        .teardown(done)
+        .done(done)
     })
 
     it("should allow concurrent value groups using signals", function(done) {
@@ -223,7 +224,7 @@ describe("museq", function() {
           .at(810, function(results) {
             results.should.deep.equal([21, 22, 24, 25, 23, 26, 27, 28, 29])
           }))
-        .teardown(done)
+        .done(done)
     })
 
     it("should allow the interval to be a signal", function(done) {
@@ -256,7 +257,7 @@ describe("museq", function() {
           .at(810, function(results) {
             results.should.deep.equal([20, 21, 22, 23])
           }))
-        .teardown(done)
+        .done(done)
     })
   })
 
