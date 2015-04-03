@@ -1,6 +1,6 @@
 {
   "name": "museq",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "time-sequence things in javascript",
   "repository": {
     "type": "git",
@@ -12,9 +12,6 @@
   },
   "author": "justinvdm",
   "license": "MIT",
-  "dependencies": {
-    "sig-js": "~0.3"
-  },
   "devDependencies": {
     "chai": "^1.9.1",
     "gulp": "^3.8.7",
